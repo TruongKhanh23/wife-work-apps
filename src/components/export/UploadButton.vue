@@ -130,19 +130,36 @@ async function handleFileUpload(e) {
         }
       });
 
-      sheetData.push([stt, ...slice]);
-      stt++;
+      // --- Chỉ push những dòng có SoTien ---
+      const moneyValue = slice[6]; // cột SoTien
+      if (moneyValue != null && moneyValue !== "" && !isNaN(Number(moneyValue))) {
+        sheetData.push([stt, ...slice]);
+        stt++;
+      }
     }
 
     const safeName = toSnakeCaseFileName(storeName);
-
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // --- Auto fit column width ---
+    const colWidths = sheetData[0].map((_, colIdx) => {
+      let maxLength = 10; // default min width
+      sheetData.forEach((row) => {
+        const v = row[colIdx];
+        if (v != null) {
+          const len = String(v).length;
+          if (len > maxLength) maxLength = len;
+        }
+      });
+      return { wch: maxLength + 2 }; // +2 padding
+    });
+    ws['!cols'] = colWidths;
 
     // === Header vàng ===
     const yellowHeaders = [
-      "SoChungTu","NgayChungTu","GhiChu","TkNo","TkCo","SoTien",
-      "DienGiai","DoiTuongCo","NganHangNo","NganHangCo","CongViecCo",
-      "MucCpCo","ThamChieu"
+      "SoChungTu", "NgayChungTu", "GhiChu", "TkNo", "TkCo", "SoTien",
+      "DienGiai", "DoiTuongCo", "NganHangNo", "NganHangCo", "CongViecCo",
+      "MucCpCo", "ThamChieu"
     ];
     sheetData[0].forEach((cellValue, colIdx) => {
       if (yellowHeaders.includes(cellValue)) {
@@ -155,9 +172,13 @@ async function handleFileUpload(e) {
       }
     });
 
-    // === Format cột Date B & AD ===
-    const dateCols = [1, 29]; // 0-based
+    // === Format cột Date, MucCpCo, SoTien như trước ===
+    const dateCols = [1, 29]; // B & AD
+    const textCol = 21; // MucCpCo
+    const moneyCol = 6; // SoTien
+
     for (let r = 1; r < sheetData.length; r++) {
+      // Date
       dateCols.forEach((c) => {
         const cellRef = XLSX.utils.encode_cell({ r, c });
         const value = sheetData[r][c];
@@ -165,29 +186,15 @@ async function handleFileUpload(e) {
           const parts = value.split("/").map(Number);
           if (parts.length === 3) {
             const d = new Date(parts[2], parts[1] - 1, parts[0]);
-            ws[cellRef] = {
-              t: "d",
-              v: d,
-              s: ws[cellRef]?.s || {}
-            };
+            ws[cellRef] = { t: "d", v: d, s: ws[cellRef]?.s || {} };
           }
         }
       });
-    }
 
-    // === Format cột MucCpCo (Text) và SoTien (Number custom) ===
-    const textCol = 21; // MucCpCo
-    const moneyCol = 6; // SoTien
-
-    for (let r = 1; r < sheetData.length; r++) {
       // MucCpCo -> Text
       const textCellRef = XLSX.utils.encode_cell({ r, c: textCol });
       if (sheetData[r][textCol] != null) {
-        ws[textCellRef] = {
-          t: "s",
-          v: sheetData[r][textCol],
-          s: ws[textCellRef]?.s || {}
-        };
+        ws[textCellRef] = { t: "s", v: sheetData[r][textCol], s: ws[textCellRef]?.s || {} };
       }
 
       // SoTien -> Number custom format
@@ -207,7 +214,6 @@ async function handleFileUpload(e) {
 
     const newWb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWb, ws, "Sheet1");
-
     const wbout = XLSX.write(newWb, { type: "array", bookType: "xlsx" });
     zip.file(`${safeName}.xlsx`, wbout);
   });
