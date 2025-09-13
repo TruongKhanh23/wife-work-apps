@@ -60,7 +60,7 @@
               </div>
 
               <!-- Form -->
-              <form @submit.prevent="handleSubmit">
+              <form @submit.prevent="handleSubmit(durationLogin, unitLogin)">
                 <div class="space-y-5">
                   <!-- Email -->
                   <div>
@@ -187,6 +187,8 @@ const showPassword = ref(false)
 const keepLoggedIn = ref(false)
 const error = ref('') // hiển thị lỗi
 const router = useRouter()
+const durationLogin = 8;
+const unitLogin = 'h';
 
 const HARD_USER = {
   email: 'yenvy07100105@gmail.com',
@@ -197,13 +199,48 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleSubmit = () => {
+const handleSubmit = (
+  duration = 1,
+  unit: 's' | 'm' | 'h' | 'd' = 'h'
+) => {
   error.value = ''
+
   if (email.value === HARD_USER.email && password.value === HARD_USER.password) {
     console.log('Login OK (demo)')
+
+    // Tính thời gian hết hạn linh hoạt
+    let multiplier = 0
+    switch (unit) {
+      case 's':
+        multiplier = 1000
+        break
+      case 'm':
+        multiplier = 60 * 1000
+        break
+      case 'h':
+        multiplier = 60 * 60 * 1000
+        break
+      case 'd':
+        multiplier = 24 * 60 * 60 * 1000
+        break
+    }
+
+    const expiryTime = new Date().getTime() + duration * multiplier
+
+    const sessionData = {
+      email: email.value,
+      loginTime: new Date().toISOString(),
+      expiry: expiryTime
+    }
+
+    // Lưu vào sessionStorage
+    sessionStorage.setItem('userSession', JSON.stringify(sessionData))
+
     router.push('/')
   } else {
     error.value = 'Email hoặc mật khẩu không đúng'
   }
 }
+
+
 </script>

@@ -619,6 +619,37 @@ const router = createRouter({
 export default router
 
 router.beforeEach((to, from, next) => {
-  document.title = `${to.meta.title}`
+  // Set document title
+  document.title = `${to.meta.title || 'App'}`
+
+  // Routes không cần login
+  const publicPages = ['/signin', '/signup', '/reset-password']
+  const authRequired = !publicPages.includes(to.path)
+
+  // Lấy session
+  const sessionStr = sessionStorage.getItem('userSession')
+  let sessionValid = false
+
+  if (sessionStr) {
+    const session = JSON.parse(sessionStr)
+    const now = new Date().getTime()
+    if (now < session.expiry) {
+      sessionValid = true
+    } else {
+      // Session hết hạn, xóa
+      sessionStorage.removeItem('userSession')
+    }
+  }
+
+  // Nếu route cần auth mà session không hợp lệ -> redirect login
+  if (authRequired && !sessionValid) {
+    return next('/signin')
+  }
+
+  // Nếu user đã login mà vào login page -> redirect home
+  if (to.path === '/signin' && sessionValid) {
+    return next('/')
+  }
+
   next()
 })

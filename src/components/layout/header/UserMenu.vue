@@ -80,8 +80,12 @@ const closeDropdown = () => {
 }
 
 const signOut = () => {
-  // Implement sign out logic here
   console.log('Signing out...')
+
+  // Xóa session
+  sessionStorage.removeItem('userSession')
+
+  // Đóng dropdown
   closeDropdown()
 }
 
