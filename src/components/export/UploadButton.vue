@@ -1,31 +1,16 @@
 <template>
-  <div
-    class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
-  >
+  <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
     <div class="px-4 py-4 sm:pl-6 sm:pr-4">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".xlsx,.xls"
-            @change="handleFileUpload"
-            class="hidden"
-          />
+          <input ref="fileInput" type="file" accept=".xlsx,.xls" @change="handleFileUpload" class="hidden" />
 
-          <input
-            type="text"
-            :value="fileName"
-            placeholder="Upload File..."
-            disabled
-            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
-          />
+          <input type="text" :value="fileName" placeholder="Upload File..." disabled
+            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]" />
 
-          <button
-            @click="$refs.fileInput.click()"
-            class="flex items-center justify-center w-full gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
-          >
+          <button @click="$refs.fileInput.click()"
+            class="flex items-center justify-center w-full gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto">
             Upload File
           </button>
         </div>
@@ -36,17 +21,17 @@
 
 <script setup>
 import { ref } from "vue";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
 // Header cố định (B → AH)
 const HEADERS = [
-  "NgayChungTu","GhiChu","DoiTuong","TkNo","TkCo","SoTienNte","SoTien",
-  "DienGiai","NguoiGiaoDich","DiaChi","TienTe","TyGia","TkClear",
-  "DoiTuongNo","DoiTuongCo","NganHangNo","NganHangCo","CongViecNo","CongViecCo",
-  "MucCpNo","MucCpCo","SpNo","SpCo","MaHHNo","MaHHCo","MaExtra1","MaExtra2",
-  "DonViNhan","ThamChieu","NhanVien","",
+  "NgayChungTu", "GhiChu", "DoiTuong", "TkNo", "TkCo", "SoTienNte", "SoTien",
+  "DienGiai", "NguoiGiaoDich", "DiaChi", "TienTe", "TyGia", "TkClear",
+  "DoiTuongNo", "DoiTuongCo", "NganHangNo", "NganHangCo", "CongViecNo", "CongViecCo",
+  "MucCpNo", "MucCpCo", "SpNo", "SpCo", "MaHHNo", "MaHHCo", "MaExtra1", "MaExtra2",
+  "DonViNhan", "ThamChieu", "NhanVien", "",
 ];
 
 const EXTRA_DATE_HEADERS = ["NgayChungTu", "ThamChieu"];
@@ -57,7 +42,7 @@ function excelDateToString(val) {
   if (typeof val === "number" && !isNaN(val)) {
     const d = XLSX.SSF.parse_date_code(val);
     if (d && d.y) {
-      return `${String(d.d).padStart(2,"0")}/${String(d.m).padStart(2,"0")}/${d.y}`;
+      return `${String(d.d).padStart(2, "0")}/${String(d.m).padStart(2, "0")}/${d.y}`;
     }
   }
   if (typeof val === "string") {
@@ -67,7 +52,7 @@ function excelDateToString(val) {
     if (dm) return val;
     const parsed = new Date(val);
     if (!isNaN(parsed.getTime())) {
-      return `${String(parsed.getDate()).padStart(2,"0")}/${String(parsed.getMonth()+1).padStart(2,"0")}/${parsed.getFullYear()}`;
+      return `${String(parsed.getDate()).padStart(2, "0")}/${String(parsed.getMonth() + 1).padStart(2, "0")}/${parsed.getFullYear()}`;
     }
   }
   return val;
@@ -129,7 +114,7 @@ async function handleFileUpload(e) {
     if (!storeName) return;
 
     const sheetData = [];
-    sheetData.push(["STT", ...HEADERS]);
+    sheetData.push(["SoChungTu", ...HEADERS]);
 
     const blockSize = HEADERS.length;
     let stt = 1;
@@ -150,8 +135,32 @@ async function handleFileUpload(e) {
 
     const safeName = toSnakeCaseFileName(storeName);
 
-    const newWb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Xác định index các cột cần fill vàng (theo HEADERS bạn muốn)
+    const yellowHeaders = [
+      "SoChungTu", "NgayChungTu", "GhiChu", "TkNo", "TkCo", "SoTien",
+      "DienGiai", "DoiTuongCo", "NganHangNo", "NganHangCo", "CongViecCo",
+      "MucCpCo", "ThamChieu"
+    ];
+
+    // Gán style cho header row (row 1)
+    sheetData[0].forEach((cellValue, colIdx) => {
+      if (yellowHeaders.includes(cellValue)) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: colIdx });
+        if (!ws[cellRef]) return;
+        ws[cellRef].s = {
+          fill: {
+            patternType: "solid",
+            fgColor: { rgb: "FFFF00" } // màu vàng
+          },
+          font: { bold: true }
+        };
+      }
+    });
+
+    // Tạo workbook như cũ
+    const newWb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWb, ws, "Sheet1");
 
     const wbout = XLSX.write(newWb, { type: "array", bookType: "xlsx" });
