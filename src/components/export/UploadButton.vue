@@ -122,6 +122,7 @@ async function handleFileUpload(e) {
     for (let colStart = 3; colStart < row.length; colStart += blockSize) {
       const slice = row.slice(colStart, colStart + blockSize);
 
+      // Chuyển date trong slice thành dd/mm/yyyy
       dateColumnIndexes.forEach((dateIdx) => {
         if (dateIdx < slice.length) {
           const v = slice[dateIdx];
@@ -137,29 +138,73 @@ async function handleFileUpload(e) {
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
 
-    // Xác định index các cột cần fill vàng (theo HEADERS bạn muốn)
+    // === Header vàng ===
     const yellowHeaders = [
-      "SoChungTu", "NgayChungTu", "GhiChu", "TkNo", "TkCo", "SoTien",
-      "DienGiai", "DoiTuongCo", "NganHangNo", "NganHangCo", "CongViecCo",
-      "MucCpCo", "ThamChieu"
+      "SoChungTu","NgayChungTu","GhiChu","TkNo","TkCo","SoTien",
+      "DienGiai","DoiTuongCo","NganHangNo","NganHangCo","CongViecCo",
+      "MucCpCo","ThamChieu"
     ];
-
-    // Gán style cho header row (row 1)
     sheetData[0].forEach((cellValue, colIdx) => {
       if (yellowHeaders.includes(cellValue)) {
         const cellRef = XLSX.utils.encode_cell({ r: 0, c: colIdx });
         if (!ws[cellRef]) return;
         ws[cellRef].s = {
-          fill: {
-            patternType: "solid",
-            fgColor: { rgb: "FFFF00" } // màu vàng
-          },
+          fill: { patternType: "solid", fgColor: { rgb: "FFFF00" } },
           font: { bold: true }
         };
       }
     });
 
-    // Tạo workbook như cũ
+    // === Format cột Date B & AD ===
+    const dateCols = [1, 29]; // 0-based
+    for (let r = 1; r < sheetData.length; r++) {
+      dateCols.forEach((c) => {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+        const value = sheetData[r][c];
+        if (value) {
+          const parts = value.split("/").map(Number);
+          if (parts.length === 3) {
+            const d = new Date(parts[2], parts[1] - 1, parts[0]);
+            ws[cellRef] = {
+              t: "d",
+              v: d,
+              s: ws[cellRef]?.s || {}
+            };
+          }
+        }
+      });
+    }
+
+    // === Format cột MucCpCo (Text) và SoTien (Number custom) ===
+    const textCol = 21; // MucCpCo
+    const moneyCol = 6; // SoTien
+
+    for (let r = 1; r < sheetData.length; r++) {
+      // MucCpCo -> Text
+      const textCellRef = XLSX.utils.encode_cell({ r, c: textCol });
+      if (sheetData[r][textCol] != null) {
+        ws[textCellRef] = {
+          t: "s",
+          v: sheetData[r][textCol],
+          s: ws[textCellRef]?.s || {}
+        };
+      }
+
+      // SoTien -> Number custom format
+      const moneyCellRef = XLSX.utils.encode_cell({ r, c: moneyCol });
+      const moneyValue = Number(sheetData[r][moneyCol]);
+      if (!isNaN(moneyValue)) {
+        ws[moneyCellRef] = {
+          t: "n",
+          v: moneyValue,
+          s: {
+            ...ws[moneyCellRef]?.s,
+            numFmt: '_(* #.##0_);_(* (#.##0);_(* "-"??_);_(@_)'
+          }
+        };
+      }
+    }
+
     const newWb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWb, ws, "Sheet1");
 
@@ -170,4 +215,5 @@ async function handleFileUpload(e) {
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, "processed_files.zip");
 }
+
 </script>
