@@ -192,6 +192,7 @@
           </div>
         </div>
       </nav>
+      <SidebarWidget v-if="isExpanded || isHovered || isMobileOpen" />
     </div>
   </aside>
 </template>
