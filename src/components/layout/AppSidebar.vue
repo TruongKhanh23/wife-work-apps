@@ -14,7 +14,7 @@
     @mouseleave="isHovered = false"
   >
     <div
-      :class="['pt-8 pb-7 flex', !isExpanded && !isHovered ? 'xl:justify-center' : 'justify-start']"
+      :class="['pt-6 pb-6 flex', !isExpanded && !isHovered ? 'xl:justify-center' : 'justify-center']"
     >
       <router-link to="/">
         <img
@@ -23,7 +23,7 @@
           src="/logo-light-new.svg"
           alt="Logo"
           width="150"
-          height="40"
+          height="20"
         />
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
@@ -31,7 +31,7 @@
           src="/images/logo/logo-dark.svg"
           alt="Logo"
           width="150"
-          height="40"
+          height="20"
         />
         <img v-else src="/images/logo/logo-icon.svg" alt="Logo" width="32" height="32" />
       </router-link>
