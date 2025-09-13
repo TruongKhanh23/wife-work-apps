@@ -28,7 +28,7 @@
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="hidden dark:block"
-          src="/images/logo/logo-dark.svg"
+          src="/logo-dark-new.svg"
           alt="Logo"
           width="150"
           height="20"
