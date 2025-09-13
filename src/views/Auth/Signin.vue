@@ -274,23 +274,36 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from "vue-router";
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
+
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const keepLoggedIn = ref(false)
+const error = ref('')             // <-- lỗi hiển thị
+const router = useRouter();
+
+// Hard-coded account (demo)
+const HARD_USER = {
+  email: 'yenvy07100105@gmail.com',
+  password: 'Truongnguyenkhanh230899'
+}
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
 }
 
 const handleSubmit = () => {
-  // Handle form submission
-  console.log('Form submitted', {
-    email: email.value,
-    password: password.value,
-    keepLoggedIn: keepLoggedIn.value,
-  })
+  error.value = ''
+  // Validate against hard-coded "db"
+  if (email.value === HARD_USER.email && password.value === HARD_USER.password) {
+    // login thành công — thực tế bạn có thể set token, localStorage, route, ...
+    console.log('Login OK (demo)')
+    router.push('/')   // chuyển trang
+  } else {
+    error.value = 'Email hoặc mật khẩu không đúng'
+  }
 }
 </script>
