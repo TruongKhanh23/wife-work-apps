@@ -17,9 +17,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'Ecommerce',
-      component: () => import('../views/Ecommerce.vue'),
+      component: () => import('../views/Export/RevenueExport.vue'),
       meta: {
-        title: 'eCommerce Dashboard',
+        title: 'Trang chủ',
       },
     },
     {
@@ -619,6 +619,6 @@ const router = createRouter({
 export default router
 
 router.beforeEach((to, from, next) => {
-  document.title = `Vue.js ${to.meta.title} | TailAdmin - Vue.js Tailwind CSS Dashboard Template`
+  document.title = `${to.meta.title}`
   next()
 })

@@ -7,8 +7,8 @@
     <div>
       <div class="mx-auto w-full max-w-[460px] text-center">
         <router-link to="/" class="inline-block mb-6">
-          <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
-          <img class="hidden dark:block" src="/images/logo/logo.svg" alt="Logo" />
+          <img class="dark:hidden" src="/logo-light-new.svg" alt="Logo" />
+          <img class="hidden dark:block" src="/logo-light-new.svg" alt="Logo" />
         </router-link>
 
         <h1 class="mb-3 font-bold text-gray-800 text-title-md dark:text-white/90 xl:text-title-xl">

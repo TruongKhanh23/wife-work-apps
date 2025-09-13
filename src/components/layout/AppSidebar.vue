@@ -20,7 +20,7 @@
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="dark:hidden"
-          src="/images/logo/logo.svg"
+          src="/logo-light-new.svg"
           alt="Logo"
           width="150"
           height="40"
