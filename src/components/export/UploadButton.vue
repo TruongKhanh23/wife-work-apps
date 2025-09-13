@@ -171,7 +171,9 @@ async function handleFileUpload(e) {
     for (let colStart = 3; colStart < row.length; colStart += blockSize) {
       const slice = createSheetDataSlice(row.slice(colStart, colStart + blockSize), dateColumnIndexes)
       const moneyValue = slice[6]
-      if (moneyValue != null && moneyValue !== '' && !isNaN(Number(moneyValue))) sheetData.push([stt++, ...slice])
+      if (moneyValue != null && moneyValue !== '' && !isNaN(Number(moneyValue))) {
+        sheetData.push([stt++, ...slice])
+      }
     }
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData)
@@ -182,7 +184,15 @@ async function handleFileUpload(e) {
     zip.file(`${toSnakeCaseFileName(storeName)}.xlsx`, XLSX.write(newWb, { type: 'array', bookType: 'xlsx' }))
   })
 
+  // 👉 Đặt tên file zip theo ngày hiện tại dd-mm-yyyy
+  const today = new Date()
+  const dd = String(today.getDate()).padStart(2, '0')
+  const mm = String(today.getMonth() + 1).padStart(2, '0')
+  const yyyy = today.getFullYear()
+  const dateStr = `${dd}-${mm}-${yyyy}`
+
   const content = await zip.generateAsync({ type: 'blob' })
-  saveAs(content, 'processed_files.zip')
+  saveAs(content, `${dateStr}.zip`)
 }
+
 </script>
