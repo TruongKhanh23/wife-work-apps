@@ -7,6 +7,14 @@ const router = createRouter({
   },
   routes: [
     {
+      path: '/revenue-export',
+      name: 'Revenue Export',
+      component: () => import('../views/Export/RevenueExport.vue'),
+      meta: {
+        title: 'Revenue Export',
+      },
+    },
+    {
       path: '/',
       name: 'Ecommerce',
       component: () => import('../views/Ecommerce.vue'),
