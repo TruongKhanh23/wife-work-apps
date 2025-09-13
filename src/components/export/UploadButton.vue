@@ -155,7 +155,7 @@ async function handleFileUpload(e) {
     });
     ws['!cols'] = colWidths;
 
-    // === Header vàng ===
+    // --- Header vàng ---
     const yellowHeaders = [
       "SoChungTu", "NgayChungTu", "GhiChu", "TkNo", "TkCo", "SoTien",
       "DienGiai", "DoiTuongCo", "NganHangNo", "NganHangCo", "CongViecCo",
@@ -164,15 +164,13 @@ async function handleFileUpload(e) {
     sheetData[0].forEach((cellValue, colIdx) => {
       if (yellowHeaders.includes(cellValue)) {
         const cellRef = XLSX.utils.encode_cell({ r: 0, c: colIdx });
-        if (!ws[cellRef]) return;
-        ws[cellRef].s = {
-          fill: { patternType: "solid", fgColor: { rgb: "FFFF00" } },
-          font: { bold: true }
-        };
+        ws[cellRef].s = ws[cellRef].s || {};
+        ws[cellRef].s.fill = { patternType: "solid", fgColor: { rgb: "FFFF00" } };
+        ws[cellRef].s.font = { bold: true };
       }
     });
 
-    // === Format cột Date, MucCpCo, SoTien như trước ===
+    // --- Định dạng các cột đặc biệt ---
     const dateCols = [1, 29]; // B & AD
     const textCol = 21; // MucCpCo
     const moneyCol = 6; // SoTien
@@ -212,6 +210,30 @@ async function handleFileUpload(e) {
       }
     }
 
+    // --- Border cho tất cả ô ---
+    const thinBorder = {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } },
+    };
+
+    const totalRows = sheetData.length;
+    const totalCols = HEADERS.length; // cố định theo HEADERS
+
+    for (let r = 0; r < totalRows; r++) {
+      for (let c = 0; c < totalCols; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+        if (!ws[cellRef]) {
+          // Nếu chưa có ô, tạo ô trống
+          ws[cellRef] = { t: "s", v: "", s: {} };
+        }
+        ws[cellRef].s = ws[cellRef].s || {};
+        ws[cellRef].s.border = thinBorder;
+      }
+    }
+
+    // --- Tạo workbook ---
     const newWb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWb, ws, "Sheet1");
     const wbout = XLSX.write(newWb, { type: "array", bookType: "xlsx" });
