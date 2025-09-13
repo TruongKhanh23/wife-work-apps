@@ -141,19 +141,24 @@ async function handleFileUpload(e) {
     const safeName = toSnakeCaseFileName(storeName);
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
 
-    // --- Auto fit column width ---
-    const colWidths = sheetData[0].map((_, colIdx) => {
-      let maxLength = 10; // default min width
-      sheetData.forEach((row) => {
-        const v = row[colIdx];
-        if (v != null) {
-          const len = String(v).length;
-          if (len > maxLength) maxLength = len;
-        }
-      });
-      return { wch: maxLength + 2 }; // +2 padding
+    // --- Các cột mặc định ẩn ---
+    const hiddenColIndexes = [3, 6, 9, 10, 11, 12, 13, 14, 18, 20, 22, 23, 24, 25, 26, 27, 28, 30];
+
+    // --- Auto fit column width + giữ hidden ---
+    ws['!cols'] = ws['!cols'] || [];
+    sheetData[0].forEach((_, colIdx) => {
+      const maxLength = Math.max(
+        10,
+        ...sheetData.map(row => (row[colIdx] != null ? String(row[colIdx]).length : 0))
+      ) + 2; // padding
+
+      ws['!cols'][colIdx] = ws['!cols'][colIdx] || {};
+      ws['!cols'][colIdx].wch = maxLength;
+
+      if (hiddenColIndexes.includes(colIdx)) {
+        ws['!cols'][colIdx].hidden = true;
+      }
     });
-    ws['!cols'] = colWidths;
 
     // --- Header vàng ---
     const yellowHeaders = [
@@ -219,13 +224,12 @@ async function handleFileUpload(e) {
     };
 
     const totalRows = sheetData.length;
-    const totalCols = HEADERS.length; // cố định theo HEADERS
+    const totalCols = HEADERS.length;
 
     for (let r = 0; r < totalRows; r++) {
       for (let c = 0; c < totalCols; c++) {
         const cellRef = XLSX.utils.encode_cell({ r, c });
         if (!ws[cellRef]) {
-          // Nếu chưa có ô, tạo ô trống
           ws[cellRef] = { t: "s", v: "", s: {} };
         }
         ws[cellRef].s = ws[cellRef].s || {};
@@ -243,5 +247,6 @@ async function handleFileUpload(e) {
   const content = await zip.generateAsync({ type: "blob" });
   saveAs(content, "processed_files.zip");
 }
+
 
 </script>
