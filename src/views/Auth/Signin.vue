@@ -91,6 +91,7 @@
                         :type="showPassword ? 'text' : 'password'"
                         id="password"
                         placeholder="Enter your password"
+                        autocomplete="off"
                         :class="[
                           'dark:bg-dark-900 h-11 w-full rounded-lg border py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3',
                           error ? 'border-error-500 focus:border-error-500 focus:ring-error-100' : 'border-gray-300 focus:border-brand-300 focus:ring-brand-500/10'
@@ -116,22 +117,22 @@
                     <div>
                       <label class="flex items-center text-sm font-normal text-gray-700 cursor-pointer select-none dark:text-gray-400">
                         <div class="relative">
-                          <input v-model="keepLoggedIn" type="checkbox" id="keepLoggedIn" class="sr-only" />
-                          <div :class="keepLoggedIn ? 'border-brand-500 bg-brand-500' : 'bg-transparent border-gray-300 dark:border-gray-700'"
+                          <input v-model="rememberMe" type="checkbox" id="rememberMe" class="sr-only" />
+                          <div :class="rememberMe ? 'border-brand-500 bg-brand-500' : 'bg-transparent border-gray-300 dark:border-gray-700'"
                                class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
-                            <span :class="keepLoggedIn ? '' : 'opacity-0'">
+                            <span :class="rememberMe ? '' : 'opacity-0'">
                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="white" stroke-width="1.94437" stroke-linecap="round" stroke-linejoin="round"/>
                               </svg>
                             </span>
                           </div>
                         </div>
-                        Keep me logged in
+                        Remember me
                       </label>
                     </div>
-                    <router-link to="/reset-password" class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400">
+                    <!-- <router-link to="/reset-password" class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400">
                       Forgot password?
-                    </router-link>
+                    </router-link> -->
                   </div>
 
                   <!-- Error message -->
@@ -150,9 +151,9 @@
               <div class="mt-5">
                 <p class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
                   Don't have an account?
-                  <router-link to="/signup" class="text-brand-500 hover:text-brand-600 dark:text-brand-400">
-                    Sign Up
-                  </router-link>
+                  <a href="https://truongkhanh23.vercel.app/" target="_blank" class="text-brand-500 hover:text-brand-600 dark:text-brand-400">
+                    Contact with Truong Nguyen Khanh
+                  </a>
                 </p>
               </div>
             </div>
@@ -176,15 +177,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 
+
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
-const keepLoggedIn = ref(false)
+const rememberMe = ref(false)
 const error = ref('') // hiển thị lỗi
 const router = useRouter()
 const durationLogin = 8;
@@ -194,6 +196,17 @@ const HARD_USER = {
   email: 'yenvy07100105@gmail.com',
   password: 'Truongnguyenkhanh230899',
 }
+
+// Khi component mount, kiểm tra localStorage
+nextTick(() => {
+  const savedCredentials = localStorage.getItem('rememberMe')
+  if (savedCredentials) {
+    const data = JSON.parse(savedCredentials)
+    email.value = data.email
+    password.value = data.password
+    rememberMe.value = true
+  }
+})
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value
@@ -208,21 +221,13 @@ const handleSubmit = (
   if (email.value === HARD_USER.email && password.value === HARD_USER.password) {
     console.log('Login OK (demo)')
 
-    // Tính thời gian hết hạn linh hoạt
+    // Tính thời gian hết hạn session
     let multiplier = 0
     switch (unit) {
-      case 's':
-        multiplier = 1000
-        break
-      case 'm':
-        multiplier = 60 * 1000
-        break
-      case 'h':
-        multiplier = 60 * 60 * 1000
-        break
-      case 'd':
-        multiplier = 24 * 60 * 60 * 1000
-        break
+      case 's': multiplier = 1000; break
+      case 'm': multiplier = 60 * 1000; break
+      case 'h': multiplier = 60 * 60 * 1000; break
+      case 'd': multiplier = 24 * 60 * 60 * 1000; break
     }
 
     const expiryTime = new Date().getTime() + duration * multiplier
@@ -233,14 +238,20 @@ const handleSubmit = (
       expiry: expiryTime
     }
 
-    // Lưu vào sessionStorage
+    // Lưu session
     sessionStorage.setItem('userSession', JSON.stringify(sessionData))
+
+    // Nếu rememberMe được check => lưu vào localStorage
+    if (rememberMe.value) {
+      localStorage.setItem('rememberMe', JSON.stringify({ email: email.value, password: password.value }))
+    } else {
+      localStorage.removeItem('rememberMe')
+    }
 
     router.push('/')
   } else {
     error.value = 'Email hoặc mật khẩu không đúng'
   }
 }
-
 
 </script>
