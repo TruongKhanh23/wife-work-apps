@@ -4,16 +4,16 @@
 $today = Get-Date -Format "dd-MM-yyyy"
 
 # Hỏi người dùng tên folder nguồn
-$srcFolderInput = Read-Host "Nhập tên folder nguồn nếu khác giá trị mặc định (mặc định khi nhấn enter: $today)"
+$srcFolderInput = Read-Host "Nhập tên folder nguồn (mặc định: $today)"
 if ([string]::IsNullOrWhiteSpace($srcFolderInput)) {
     $srcFolderInput = $today
 }
 
-# Xác định thư mục nguồn và đích dựa trên thư mục chứa script
+# Thư mục nguồn và đích
 $src = Join-Path $PSScriptRoot $srcFolderInput
 $dst = Join-Path $PSScriptRoot ("$srcFolderInput-Converted")
 
-# Kiểm tra thư mục nguồn có tồn tại không
+# Kiểm tra thư mục nguồn
 if (-not (Test-Path $src)) {
     Write-Host "Thư mục nguồn $src không tồn tại!"
     Pause
@@ -34,6 +34,15 @@ $excel.DisplayAlerts = $false
 Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
     Write-Host "Converting $($_.Name)..."
     $wb = $excel.Workbooks.Open($_.FullName)
+    $sheet = $wb.Sheets.Item(1)
+
+    # Định dạng các cột theo yêu cầu
+    $sheet.Columns.Item(2).NumberFormat = "dd/mm/yyyy"
+    $sheet.Columns.Item(8).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* `"-"??_);_(@_)'
+    $sheet.Columns.Item(22).NumberFormat = "@"
+    $sheet.Columns.Item(30).NumberFormat = "dd/mm/yyyy"
+
+    # Lưu sang xls
     $newName = Join-Path $dst ($_.BaseName + ".xls")
     $wb.SaveAs($newName, 56)
     $wb.Close($false)

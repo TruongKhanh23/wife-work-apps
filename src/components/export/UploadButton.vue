@@ -2,7 +2,8 @@
   <div
     class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
   >
-    <div class="px-4 py-4 sm:pl-6 sm:pr-4">
+    <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
+      <!-- Upload + Template buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
@@ -26,11 +27,48 @@
             Upload File
           </button>
         </div>
+        <div class="flex gap-2 flex-wrap">
+          <button
+            @click="downloadTemplate"
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-gray-500 shadow-theme-xs hover:bg-gray-600 sm:w-auto"
+          >
+            Tải file mẫu
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10"
+      >
+        <div class="w-full max-w-[830px] flex flex-col gap-4">
+          <h3 class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl">
+            Hướng dẫn chuyển đổi thành file Excel 97 - 2003 Workbook
+          </h3>
+
+          <ol
+            class="list-decimal list-inside text-sm text-gray-500 dark:text-gray-400 sm:text-base flex flex-col gap-2"
+          >
+            <li>Tải và giải nén folder kết quả.</li>
+            <li>
+              Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
+              <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút xanh bên dưới và
+              đặt chúng cùng với folder kết quả.
+            </li>
+            <li>Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.</li>
+            <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
+          </ol>
+
+          <div class="mb-5 overflow-hidden rounded-lg">
+            <img src="/demo-convert-to-xls.png" alt="card" class="overflow-hidden rounded-lg" />
+          </div>
+        </div>
+
+        <!-- New: Download conversion tool -->
         <button
-          @click="downloadTemplate"
-          class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-gray-500 shadow-theme-xs hover:bg-gray-600 sm:w-auto"
+          @click="downloadConversionTool"
+          class="flex items-center justify-center mt-1 gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-green-500 shadow-theme-xs hover:bg-green-600 sm:w-auto"
         >
-          Tải file mẫu
+          Download tool convert Excel 97-2003
         </button>
       </div>
     </div>
@@ -291,5 +329,32 @@ async function handleFileUpload(e) {
 
   const content = await zip.generateAsync({ type: 'blob' })
   saveAs(content, `${dateStr}.zip`)
+}
+
+// --- New: Download conversion tool ---
+async function downloadConversionTool() {
+  try {
+    // Create a zip containing both BAT + PS1 files
+    const zip = new JSZip()
+    const files = [
+      { path: '/convert-to-xls/convert_to_xls.bat', name: 'convert_to_xls.bat' },
+      {
+        path: '/convert-to-xls/do_not_touch_convert_excel.ps1',
+        name: 'do_not_touch_convert_excel.ps1',
+      },
+    ]
+
+    for (const file of files) {
+      const response = await fetch(file.path)
+      if (!response.ok) throw new Error(`Không tải được file ${file.name}`)
+      const blob = await response.blob()
+      zip.file(file.name, blob)
+    }
+
+    const content = await zip.generateAsync({ type: 'blob' })
+    saveAs(content, 'Excel_Conversion_Tool.zip')
+  } catch (err) {
+    alert('❌ Lỗi tải công cụ: ' + err.message)
+  }
 }
 </script>
