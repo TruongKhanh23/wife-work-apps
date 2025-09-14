@@ -21,5 +21,13 @@
 </template>
 
 <script setup>
-const deployTime = __DEPLOY_TIME__
+import { ref, onMounted } from 'vue'
+
+const deployTime = ref('')
+
+onMounted(() => {
+  // thời gian runtime = đúng giờ client
+  const now = new Date()
+  deployTime.value = now.toLocaleString('vi-VN', { hour12: false })
+})
 </script>
