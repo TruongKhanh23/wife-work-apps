@@ -38,9 +38,15 @@ Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
 
     # Định dạng các cột theo yêu cầu
     $sheet.Columns.Item(2).NumberFormat = "dd/mm/yyyy"
-    $sheet.Columns.Item(8).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* `"-"??_);_(@_)'
+    $sheet.Columns.Item(7).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* "-"??_);_(@_)'
+    $sheet.Columns.Item(8).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* "-"??_);_(@_)'
     $sheet.Columns.Item(22).NumberFormat = "@"
     $sheet.Columns.Item(30).NumberFormat = "dd/mm/yyyy"
+
+    # Gán giá trị 0 cho toàn bộ cột 7
+    $usedRange = $sheet.UsedRange
+    $lastRow = $usedRange.Rows.Count
+    $sheet.Range("G2:G$lastRow").Value2 = 0   # từ dòng 2 đến hết (giữ header dòng 1)
 
     # Lưu sang xls
     $newName = Join-Path $dst ($_.BaseName + ".xls")
