@@ -6,6 +6,32 @@
       <!-- Upload + Export buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <!-- Start Date -->
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Start Date
+            </label>
+            <flat-pickr
+              v-model="startDate"
+              :config="flatpickrConfig"
+              class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[180px]"
+              placeholder="Select start date"
+            />
+          </div>
+
+          <!-- End Date -->
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              End Date
+            </label>
+            <flat-pickr
+              v-model="endDate"
+              :config="flatpickrConfig"
+              class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[180px]"
+              placeholder="Select end date"
+            />
+          </div>
+
           <div>
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
               Upload New Password (if changes)
@@ -78,8 +104,15 @@
       <!-- Table -->
       <div v-if="accounts.length" class="mt-4">
         <h3 class="font-semibold mb-2">
-          {{ isProcessing ? 'Processing branches:' : 'Default branches:' }}
+          {{
+            isProcessing
+              ? 'Processing branches:'
+              : isUploadedFile
+              ? 'Your uploaded branches:'
+              : 'Default branches:'
+          }}
         </h3>
+
         <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
           <thead>
             <tr class="bg-gray-100">
@@ -123,15 +156,30 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import * as XLSX from 'xlsx'
+import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import { exportOrdersToExcel } from '@/utils/beExport'
+import dayjs from 'dayjs'
+
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
+
+// ✅ Ngày hôm qua
+const yesterday = new Date()
+yesterday.setDate(yesterday.getDate() - 1)
+
+// ✅ Ref
+const startDate = ref(yesterday)
+const endDate = ref(yesterday)
+const flatpickrConfig = { dateFormat: 'Y-m-d', altInput: true, altFormat: 'F j, Y' }
 
 const fileName = ref('')
 const accounts = ref([])
 const isLoading = ref(false)
 const isProcessing = ref(false)
 const stopFlag = ref(false)
-const processedAccounts = ref([]) // lưu những quán đã Done
+const processedAccounts = ref([])
+const isUploadedFile = ref(false)
 
 function stopProcessing() {
   stopFlag.value = true
@@ -153,11 +201,12 @@ async function loadAccountsFromExcel(url) {
       account: row[1],
       password: row[2],
       merchantId: row[3],
-      status: 'Not Start', // ✅ thêm status mặc định
+      status: 'Not Start',
     }))
     .filter((acc) => acc.branch && acc.account)
 }
 
+// Tải file mẫu
 async function downloadTemplate() {
   try {
     const response = await fetch('/be-export/branches_accounts.xlsx')
@@ -169,11 +218,14 @@ async function downloadTemplate() {
   }
 }
 
+// Upload file mới
 async function handleFileUpload(e) {
   const file = e.target.files[0]
   if (!file) return
 
   fileName.value = file.name
+  isUploadedFile.value = true
+
   try {
     const data = await file.arrayBuffer()
     const workbook = XLSX.read(data, { type: 'array' })
@@ -187,65 +239,73 @@ async function handleFileUpload(e) {
         account: row[1],
         password: row[2],
         merchantId: row[3],
-        status: 'Not Start', // ✅ mặc định
+        status: 'Not Start',
       }))
       .filter((acc) => acc.branch && acc.account)
-
-    if (accounts.value.length) {
-      isProcessing.value = true
-      isLoading.value = true
-
-      // ✅ Cập nhật trạng thái theo từng quán
-      for (const acc of accounts.value) {
-        acc.status = 'Processing'
-        await exportOrdersToExcel([acc]) // xử lý từng quán
-        acc.status = 'Done'
-      }
-
-      alert('✅ Xuất file BE thành công')
-    }
-  } catch (err) {
-    alert('❌ Lỗi đọc file Excel: ' + err.message)
-  } finally {
-    isLoading.value = false
+  } catch (error) {
+    alert('❌ Lỗi đọc file Excel: ' + error.message)
   }
 }
 
+// Download các file đã Done khi stop
+async function downloadProcessedAccounts(accounts) {
+  const zip = new JSZip()
+  for (const acc of accounts) {
+    if (acc.workbook) {
+      const buf = await acc.workbook.xlsx.writeBuffer()
+      zip.file(`${acc.branch}.xlsx`, buf)
+    }
+  }
+  const content = await zip.generateAsync({ type: 'blob' })
+  saveAs(content, 'be-orders.zip')
+}
+
+// Handle Export
 async function handleExport() {
+  if (!accounts.value.length) {
+    accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
+  }
+
+  isLoading.value = true
+  isProcessing.value = true
+  stopFlag.value = false
+  processedAccounts.value = []
+
   try {
-    isLoading.value = true
-    isProcessing.value = true
-    stopFlag.value = false
-    processedAccounts.value = []
+    for (const acc of accounts.value) {
+      if (stopFlag.value) break
 
-    let listToProcess = accounts.value
-    if (!listToProcess.length) {
-      listToProcess = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
-      accounts.value = listToProcess
-    }
-
-    for (const acc of listToProcess) {
-      if (stopFlag.value) break // ✅ nếu bấm Stop thì thoát vòng lặp
       acc.status = 'Processing'
-      await exportOrdersToExcel([acc], false) // false = không download ngay
-      acc.status = 'Done'
-      processedAccounts.value.push(acc)
+
+      // Export chỉ trả về workbook, chưa download
+      const workbook = await exportOrdersToExcel(
+        [acc],
+        false,
+        dayjs(startDate.value).format('YYYY-MM-DD'),
+        dayjs(endDate.value).format('YYYY-MM-DD'),
+        stopFlag
+      )
+
+      if (workbook) {
+        acc.workbook = workbook
+        acc.status = 'Done'
+        processedAccounts.value.push(acc)
+      }
     }
 
-    if (stopFlag.value) {
-      // ✅ Nếu stop thì nén & download những quán đã xử lý xong
-      await exportOrdersToExcel(processedAccounts.value, true)
+    // Nếu stop giữa chừng, download các file Done
+    if (processedAccounts.value.length) {
+      await downloadProcessedAccounts(processedAccounts.value)
     }
 
-    // ✅ Reset status về Not Start sau khi chạy hết (chỉ khi không Stop)
+    // Reset trạng thái nếu chạy hết mà không stop
     if (!stopFlag.value) {
       accounts.value.forEach((acc) => (acc.status = 'Not Start'))
     }
-
-    isProcessing.value = false
   } catch (err) {
     alert('❌ Lỗi Export: ' + err.message)
   } finally {
+    isProcessing.value = false
     isLoading.value = false
   }
 }
@@ -253,7 +313,6 @@ async function handleExport() {
 onMounted(async () => {
   try {
     accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
-    isProcessing.value = false
   } catch (err) {
     console.error('Không load được danh sách mặc định:', err.message)
   }
