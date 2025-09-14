@@ -1,3 +1,4 @@
+// utils/beExport.js
 import ExcelJS from 'exceljs'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
@@ -7,7 +8,6 @@ import axios from 'axios'
 
 dayjs.extend(isSameOrBefore)
 
-// ==== CONFIG API ==== //
 const LOGIN_URL = 'https://gw.be.com.vn/api/v1/be-merchant-gateway/v2/merchant/login'
 const STORE_URL =
   'https://gw.be.com.vn/api/v1/be-merchant-gateway/v2/merchant/get_stores_of_merchant'
@@ -18,7 +18,6 @@ const OPERATOR_TOKEN = '0b28e008bc323838f5ec84f718ef11e6'
 const USER_ID = 77550
 const DEVICE_TYPE = 2
 
-// ==== DATE RANGE ==== //
 const START_DATE = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 const END_DATE = dayjs().format('YYYY-MM-DD')
 
@@ -33,7 +32,7 @@ function getDateRange(start, end) {
   return range
 }
 
-// ==== API CALLS ==== //
+// ==== API CALLS ====
 async function login(account) {
   const body = {
     operator_token: OPERATOR_TOKEN,
@@ -88,10 +87,15 @@ async function fetchOrders(token, store_id, date, account) {
   return res.data.restaurant_orders || []
 }
 
-// ==== MAIN EXPORT ==== //
-export async function exportOrdersToExcel(accounts) {
+// ==== EXPORT ORDERS ====
+/**
+ * @param {Array} accounts - danh sách account
+ * @param {Boolean} shouldDownload - true: download zip, false: chỉ update status
+ */
+export async function exportOrdersToExcel(accounts, shouldDownload = true) {
   const dates = getDateRange(START_DATE, END_DATE)
   const zip = new JSZip()
+  const processedAccounts = []
 
   for (const account of accounts) {
     try {
@@ -99,12 +103,13 @@ export async function exportOrdersToExcel(accounts) {
       const token = await login(account)
       const stores = await getStores(token, account)
 
-      // match store by tên chi nhánh
       const matchedStore = stores.find((s) =>
         s.store_name.toLowerCase().includes(account.branch.toLowerCase()),
       )
+
       if (!matchedStore) {
         console.warn(`⚠️ Không tìm thấy store cho: ${account.branch}`)
+        account.status = 'Error'
         continue
       }
 
@@ -127,8 +132,7 @@ export async function exportOrdersToExcel(accounts) {
         for (const order of orders) {
           for (const item of order.order_items || []) {
             let size = 'Không rõ'
-            const customize = item.customize_object || ''
-            const match = customize.match(/Size\s+(lớn|nhỏ)/i)
+            const match = (item.customize_object || '').match(/Size\s+(lớn|nhỏ)/i)
             if (match) size = match[1].toLowerCase()
 
             sheet.addRow({
@@ -141,16 +145,29 @@ export async function exportOrdersToExcel(accounts) {
           }
         }
 
-        await new Promise((r) => setTimeout(r, 200)) // tránh bị rate limit
+        await new Promise((r) => setTimeout(r, 200)) // tránh rate limit
       }
 
       const buf = await workbook.xlsx.writeBuffer()
-      zip.file(`${account.branch}.xlsx`, buf)
+      if (buf.byteLength > 0) {
+        zip.file(`${account.branch}.xlsx`, buf)
+        account.status = 'Done'
+        processedAccounts.push(account)
+      } else {
+        console.warn(`⚠️ [${account.branch}] Không có dữ liệu, bỏ qua file`)
+        account.status = 'Error'
+      }
     } catch (err) {
       console.error(`❌ [${account.branch}] Lỗi:`, err.message)
+      account.status = 'Error'
     }
   }
 
-  const content = await zip.generateAsync({ type: 'blob' })
-  saveAs(content, 'be-orders.zip')
+  if (shouldDownload && processedAccounts.length > 0) {
+    const content = await zip.generateAsync({ type: 'blob' })
+    saveAs(content, 'be-orders.zip')
+    console.log('✅ Xuất file zip thành công')
+  } else if (!shouldDownload) {
+    console.log('📦 Export xong nhưng không download (chỉ update status).')
+  }
 }

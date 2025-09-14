@@ -65,6 +65,13 @@
             </span>
             {{ isLoading ? 'Đang xử lý...' : 'Export' }}
           </button>
+          <button
+            v-if="isLoading"
+            @click="stopProcessing"
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-red-600 shadow-theme-xs hover:bg-red-700 sm:w-auto"
+          >
+            Stop
+          </button>
         </div>
       </div>
 
@@ -80,14 +87,31 @@
               <th class="border border-gray-300 px-2 py-1">Account</th>
               <th class="border border-gray-300 px-2 py-1">Password</th>
               <th class="border border-gray-300 px-2 py-1">MerchantId</th>
+              <th class="border border-gray-300 px-2 py-1">Status</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(acc, idx) in accounts" :key="idx">
               <td class="border border-gray-300 px-2 py-1">{{ acc.branch }}</td>
               <td class="border border-gray-300 px-2 py-1">{{ acc.account }}</td>
-              <td class="border border-gray-300 px-2 py-1">{{ acc.password }}</td>
-              <td class="border border-gray-300 px-2 py-1">{{ acc.merchantId }}</td>
+              <td class="border border-gray-300 px-2 py-1">
+                {{ acc.password }}
+              </td>
+              <td class="border border-gray-300 px-2 py-1">
+                {{ acc.merchantId }}
+              </td>
+              <td class="border border-gray-300 px-2 py-1">
+                <span
+                  :class="{
+                    'text-gray-500': acc.status === 'Not Start',
+                    'text-blue-600': acc.status === 'Processing',
+                    'text-green-600': acc.status === 'Done',
+                    'text-red-600': acc.status === 'Error',
+                  }"
+                >
+                  {{ acc.status }}
+                </span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -105,7 +129,14 @@ import { exportOrdersToExcel } from '@/utils/beExport'
 const fileName = ref('')
 const accounts = ref([])
 const isLoading = ref(false)
-const isProcessing = ref(false) // ✅ để phân biệt danh sách mặc định hay đang xử lý
+const isProcessing = ref(false)
+const stopFlag = ref(false)
+const processedAccounts = ref([]) // lưu những quán đã Done
+
+function stopProcessing() {
+  stopFlag.value = true
+}
+
 
 // Hàm đọc file excel
 async function loadAccountsFromExcel(url) {
@@ -123,6 +154,7 @@ async function loadAccountsFromExcel(url) {
       account: row[1],
       password: row[2],
       merchantId: row[3],
+      status: 'Not Start', // ✅ thêm status mặc định
     }))
     .filter((acc) => acc.branch && acc.account)
 }
@@ -156,13 +188,21 @@ async function handleFileUpload(e) {
         account: row[1],
         password: row[2],
         merchantId: row[3],
+        status: 'Not Start', // ✅ mặc định
       }))
       .filter((acc) => acc.branch && acc.account)
 
     if (accounts.value.length) {
-      isProcessing.value = true // ✅ chuyển sang trạng thái "đang xử lý"
+      isProcessing.value = true
       isLoading.value = true
-      await exportOrdersToExcel(accounts.value)
+
+      // ✅ Cập nhật trạng thái theo từng quán
+      for (const acc of accounts.value) {
+        acc.status = 'Processing'
+        await exportOrdersToExcel([acc]) // xử lý từng quán
+        acc.status = 'Done'
+      }
+
       alert('✅ Xuất file BE thành công')
     }
   } catch (err) {
@@ -176,33 +216,45 @@ async function handleExport() {
   try {
     isLoading.value = true;
     isProcessing.value = true;
-    if (accounts.value.length && isProcessing.value) {
-      // nếu là danh sách đang xử lý
-      await exportOrdersToExcel(accounts.value)
-      alert('✅ Xuất file BE thành công')
-      return
+    stopFlag.value = false;
+    processedAccounts.value = [];
+
+    let listToProcess = accounts.value;
+    if (!listToProcess.length) {
+      listToProcess = await loadAccountsFromExcel("/be-export/branches_accounts.xlsx");
+      accounts.value = listToProcess;
     }
 
-    // nếu vẫn là danh sách mặc định
-    const defaultAccounts = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
-    if (!defaultAccounts.length) throw new Error('File mặc định không có dữ liệu')
+    for (const acc of listToProcess) {
+      if (stopFlag.value) break; // ✅ nếu bấm Stop thì thoát vòng lặp
+      acc.status = "Processing";
+      await exportOrdersToExcel([acc], false); // false = không download ngay
+      acc.status = "Done";
+      processedAccounts.value.push(acc);
+    }
 
-    accounts.value = defaultAccounts
-    isProcessing.value = false // ✅ vẫn hiển thị là "danh sách mặc định"
-    await exportOrdersToExcel(defaultAccounts)
-    alert('✅ Xuất file BE thành công (dùng file mặc định)')
+    if (stopFlag.value) {
+      // ✅ Nếu stop thì nén & download những quán đã xử lý xong
+      await exportOrdersToExcel(processedAccounts.value, true);
+    }
+
+    // ✅ Reset status về Not Start sau khi chạy hết (chỉ khi không Stop)
+    if (!stopFlag.value) {
+      accounts.value.forEach((acc) => (acc.status = "Not Start"));
+    }
+
+    isProcessing.value = false;
   } catch (err) {
-    alert('❌ Lỗi Export: ' + err.message)
+    alert("❌ Lỗi Export: " + err.message);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
-// load danh sách quán mặc định khi mở trang
 onMounted(async () => {
   try {
     accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
-    isProcessing.value = false // ✅ mặc định
+    isProcessing.value = false
   } catch (err) {
     console.error('Không load được danh sách mặc định:', err.message)
   }
