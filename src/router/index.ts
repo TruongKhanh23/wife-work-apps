@@ -15,6 +15,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/be-export',
+      name: 'Be Export',
+      component: () => import('../views/Export/BeExport.vue'),
+      meta: {
+        title: 'Be Export',
+      },
+    },
+    {
       path: '/',
       name: 'Ecommerce',
       component: () => import('../views/Export/RevenueExport.vue'),

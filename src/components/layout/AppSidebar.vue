@@ -236,6 +236,11 @@ const menuGroups = [
         icon: TaskIcon,
         path: '/revenue-export',
       },
+      {
+        name: 'Xuất Be',
+        icon: TaskIcon,
+        path: '/be-export',
+      },
     ],
   },
 ]

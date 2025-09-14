@@ -1,0 +1,20 @@
+<template>
+  <AdminLayout>
+    <PageBreadcrumb :pageTitle="currentPageTitle" />
+    <div class="grid grid-cols-12 gap-6">
+      <div class="col-span-12">
+      </div>
+
+    </div>
+  </AdminLayout>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import AdminLayout from '@/components/layout/AdminLayout.vue'
+import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
+
+const currentPageTitle = ref('Xuất Be')
+</script>
+
+<style></style>
