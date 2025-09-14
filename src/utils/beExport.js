@@ -132,8 +132,18 @@ export async function exportOrdersToExcel(accounts, shouldDownload = true) {
         for (const order of orders) {
           for (const item of order.order_items || []) {
             let size = 'Không rõ'
-            const match = (item.customize_object || '').match(/Size\s+(lớn|nhỏ)/i)
-            if (match) size = match[1].toLowerCase()
+            const customize = item.customize_object || ''
+
+            // 1️⃣ Kiểm tra customize_object trước
+            const matchCustomize = customize.match(/Size\s*(lớn|nhỏ)/i)
+            if (matchCustomize) {
+              size = matchCustomize[1].toLowerCase()
+            } else {
+              // 2️⃣ Nếu không có, lấy từ item_name
+              const matchName = item.item_name.match(/-\s*(lớn|nhỏ)/i)
+              if (matchName) size = matchName[1].toLowerCase()
+            }
+
 
             sheet.addRow({
               restaurant_id: store_id,
