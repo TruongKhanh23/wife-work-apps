@@ -16,7 +16,7 @@
                 v-model="selectedBranch"
                 class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
               >
-                <option value="" disabled selected>Select Branch</option>
+                <option value="all" selected>All Branches</option>
                 <option v-for="acc in accounts" :key="acc.branch" :value="acc.branch">
                   {{ acc.branch }}
                 </option>
@@ -217,7 +217,7 @@ const isProcessing = ref(false)
 const stopFlag = ref(false)
 const processedAccounts = ref([])
 const isUploadedFile = ref(false)
-const selectedBranch = ref('')
+const selectedBranch = ref('all')
 
 function stopProcessing() {
   stopFlag.value = true
@@ -304,10 +304,13 @@ async function handleExport() {
     accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
   }
 
+  accounts.value.forEach(acc => (acc.status = 'Not Start'))
+
   // Lọc theo branch nếu đã chọn
-  const exportAccounts = selectedBranch.value
-    ? accounts.value.filter(acc => acc.branch === selectedBranch.value)
-    : accounts.value
+  const exportAccounts =
+  selectedBranch.value === 'all'
+    ? accounts.value
+    : accounts.value.filter(acc => acc.branch === selectedBranch.value)
 
   if (!exportAccounts.length) {
     alert('❌ Không có quán nào để export')
