@@ -1,9 +1,9 @@
-
 <template>
   <div
     class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
   >
-    <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
+    <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4 min-h-screen">
+      <!-- Upload + Export buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div>
@@ -40,7 +40,7 @@
             Download Sample Password
           </button>
 
-          <!-- Nút Export kèm Spinner -->
+          <!-- Export + Spinner -->
           <button
             @click="handleExport"
             :disabled="isLoading"
@@ -70,7 +70,9 @@
 
       <!-- Table -->
       <div v-if="accounts.length" class="mt-4">
-        <h3 class="font-semibold mb-2">Danh sách accounts:</h3>
+        <h3 class="font-semibold mb-2">
+          {{ isProcessing ? 'Danh sách quán đang xử lý:' : 'Danh sách quán mặc định:' }}
+        </h3>
         <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
           <thead>
             <tr class="bg-gray-100">
@@ -95,16 +97,35 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
-
-// Import logic BE export
 import { exportOrdersToExcel } from '@/utils/beExport'
 
 const fileName = ref('')
 const accounts = ref([])
-const isLoading = ref(false) // ✅ trạng thái loading
+const isLoading = ref(false)
+const isProcessing = ref(false) // ✅ để phân biệt danh sách mặc định hay đang xử lý
+
+// Hàm đọc file excel
+async function loadAccountsFromExcel(url) {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('Không tìm thấy file mặc định')
+  const data = await response.arrayBuffer()
+  const workbook = XLSX.read(data, { type: 'array' })
+  const sheet = workbook.Sheets[workbook.SheetNames[0]]
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+  return rows
+    .slice(1)
+    .map((row) => ({
+      branch: row[0],
+      account: row[1],
+      password: row[2],
+      merchantId: row[3],
+    }))
+    .filter((acc) => acc.branch && acc.account)
+}
 
 async function downloadTemplate() {
   try {
@@ -139,6 +160,7 @@ async function handleFileUpload(e) {
       .filter((acc) => acc.branch && acc.account)
 
     if (accounts.value.length) {
+      isProcessing.value = true // ✅ chuyển sang trạng thái "đang xử lý"
       isLoading.value = true
       await exportOrdersToExcel(accounts.value)
       alert('✅ Xuất file BE thành công')
@@ -152,33 +174,21 @@ async function handleFileUpload(e) {
 
 async function handleExport() {
   try {
-    isLoading.value = true
-    if (accounts.value.length) {
+    isLoading.value = true;
+    isProcessing.value = true;
+    if (accounts.value.length && isProcessing.value) {
+      // nếu là danh sách đang xử lý
       await exportOrdersToExcel(accounts.value)
       alert('✅ Xuất file BE thành công')
       return
     }
 
-    const response = await fetch('/be-export/branches_accounts.xlsx')
-    if (!response.ok) throw new Error('Không tìm thấy file mặc định')
-
-    const data = await response.arrayBuffer()
-    const workbook = XLSX.read(data, { type: 'array' })
-    const sheet = workbook.Sheets[workbook.SheetNames[0]]
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
-
-    const defaultAccounts = rows
-      .slice(1)
-      .map((row) => ({
-        branch: row[0],
-        account: row[1],
-        password: row[2],
-        merchantId: row[3],
-      }))
-      .filter((acc) => acc.branch && acc.account)
-
+    // nếu vẫn là danh sách mặc định
+    const defaultAccounts = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
     if (!defaultAccounts.length) throw new Error('File mặc định không có dữ liệu')
 
+    accounts.value = defaultAccounts
+    isProcessing.value = false // ✅ vẫn hiển thị là "danh sách mặc định"
     await exportOrdersToExcel(defaultAccounts)
     alert('✅ Xuất file BE thành công (dùng file mặc định)')
   } catch (err) {
@@ -187,4 +197,14 @@ async function handleExport() {
     isLoading.value = false
   }
 }
+
+// load danh sách quán mặc định khi mở trang
+onMounted(async () => {
+  try {
+    accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
+    isProcessing.value = false // ✅ mặc định
+  } catch (err) {
+    console.error('Không load được danh sách mặc định:', err.message)
+  }
+})
 </script>
