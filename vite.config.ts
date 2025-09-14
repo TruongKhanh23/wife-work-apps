@@ -4,10 +4,13 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// Lấy từ env hoặc fallback sang thời gian hiện tại
-const deployTime = process.env.DEPLOY_TIME || new Date().toLocaleString('vi-VN', { hour12: false })
+const deployTime =
+  process.env.DEPLOY_TIME ||
+  new Date().toLocaleString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour12: false,
+  })
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vueJsx(), vueDevTools()],
   resolve: {
