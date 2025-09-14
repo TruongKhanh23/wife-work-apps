@@ -51,8 +51,8 @@
             <li>Tải và giải nén folder kết quả.</li>
             <li>
               Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
-              <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút xanh bên dưới và
-              đặt chúng cùng với folder kết quả.
+              <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
+              xanh bên dưới và đặt chúng cùng với folder kết quả.
             </li>
             <li>Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.</li>
             <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
@@ -219,25 +219,31 @@ function applyStyles(ws, sheetData) {
       const cellRef = XLSX.utils.encode_cell({ r, c })
       const val = sheetData[r][c]
       if (val) {
-        let dateStr = ''
+        let jsDate = null
+
         if (typeof val === 'string') {
           const parts = val.split('/').map(Number)
           if (parts.length === 3) {
-            dateStr = `${String(parts[0]).padStart(2, '0')}/${String(parts[1]).padStart(2, '0')}/${
-              parts[2]
-            }`
+            jsDate = new Date(parts[2], parts[1] - 1, parts[0]) // dd/mm/yyyy
           }
         } else if (val instanceof Date) {
-          dateStr = `${String(val.getDate()).padStart(2, '0')}/${String(
-            val.getMonth() + 1
-          ).padStart(2, '0')}/${val.getFullYear()}`
+          jsDate = val
         }
 
-        if (dateStr) {
+        if (jsDate && !isNaN(jsDate.getTime())) {
+          // Excel serial date = days since 1900-01-00
+          const excelSerialDate = Math.floor(
+            (jsDate - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000)
+          )
+
           ws[cellRef] = {
-            t: 's', // string để chỉ hiện ngày, không dính giờ
-            v: dateStr,
-            s: { ...ws[cellRef]?.s, alignment: { horizontal: 'center' } },
+            t: 'n', // number (Excel date serial)
+            v: excelSerialDate,
+            s: {
+              ...ws[cellRef]?.s,
+              numFmt: 'dd/mm/yyyy',
+              alignment: { horizontal: 'center' },
+            },
           }
         }
       }
