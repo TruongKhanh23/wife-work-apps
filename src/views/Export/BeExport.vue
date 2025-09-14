@@ -16,7 +16,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import BeUploadButton from '@/components/export/BeUploadButton.vue'
 
-const currentPageTitle = ref('Xuất Be')
+const currentPageTitle = ref('Be Export')
 </script>
 
 <style></style>

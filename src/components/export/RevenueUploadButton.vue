@@ -31,9 +31,9 @@
         <div class="flex gap-2 flex-wrap">
           <button
             @click="downloadTemplate"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-gray-500 shadow-theme-xs hover:bg-gray-600 sm:w-auto"
+            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
           >
-            Tải file mẫu
+            Download sample file
           </button>
         </div>
       </div>
@@ -53,7 +53,7 @@
             <li>
               Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
               <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
-              xanh bên dưới và đặt chúng cùng với folder kết quả.
+              Download bên dưới và đặt chúng cùng với folder kết quả.
             </li>
             <li>Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.</li>
             <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
@@ -67,7 +67,7 @@
         <!-- New: Download conversion tool -->
         <button
           @click="downloadConversionTool"
-          class="flex items-center justify-center mt-1 gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-green-500 shadow-theme-xs hover:bg-green-600 sm:w-auto"
+          class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
         >
           Download tool convert Excel 97-2003
         </button>

@@ -16,7 +16,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import RevenueUploadButton from '@/components/export/RevenueUploadButton.vue'
 
-const currentPageTitle = ref('Xuất Doanh Thu')
+const currentPageTitle = ref('Revenue Export')
 </script>
 
 <style></style>

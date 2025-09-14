@@ -232,12 +232,12 @@ const menuGroups = [
     title: 'Excel',
     items: [
       {
-        name: 'Xuất doanh thu',
+        name: 'Revenue Export',
         icon: TaskIcon,
         path: '/revenue-export',
       },
       {
-        name: 'Xuất Be',
+        name: 'Be Export',
         icon: TaskIcon,
         path: '/be-export',
       },

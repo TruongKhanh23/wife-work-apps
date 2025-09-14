@@ -35,7 +35,7 @@
         <div class="flex gap-2 flex-wrap">
           <button
             @click="downloadTemplate"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-gray-500 shadow-theme-xs hover:bg-gray-600 sm:w-auto"
+            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
           >
             Download Sample Password
           </button>
@@ -44,7 +44,7 @@
           <button
             @click="handleExport"
             :disabled="isLoading"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-green-600 shadow-theme-xs hover:bg-green-700 disabled:opacity-70 sm:w-auto"
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
           >
             <span v-if="isLoading" class="animate-spin">
               <!-- SVG spinner -->
@@ -78,7 +78,7 @@
       <!-- Table -->
       <div v-if="accounts.length" class="mt-4">
         <h3 class="font-semibold mb-2">
-          {{ isProcessing ? 'Danh sách quán đang xử lý:' : 'Danh sách quán mặc định:' }}
+          {{ isProcessing ? 'Processing branches:' : 'Default branches:' }}
         </h3>
         <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
           <thead>
@@ -136,7 +136,6 @@ const processedAccounts = ref([]) // lưu những quán đã Done
 function stopProcessing() {
   stopFlag.value = true
 }
-
 
 // Hàm đọc file excel
 async function loadAccountsFromExcel(url) {
@@ -214,40 +213,40 @@ async function handleFileUpload(e) {
 
 async function handleExport() {
   try {
-    isLoading.value = true;
-    isProcessing.value = true;
-    stopFlag.value = false;
-    processedAccounts.value = [];
+    isLoading.value = true
+    isProcessing.value = true
+    stopFlag.value = false
+    processedAccounts.value = []
 
-    let listToProcess = accounts.value;
+    let listToProcess = accounts.value
     if (!listToProcess.length) {
-      listToProcess = await loadAccountsFromExcel("/be-export/branches_accounts.xlsx");
-      accounts.value = listToProcess;
+      listToProcess = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
+      accounts.value = listToProcess
     }
 
     for (const acc of listToProcess) {
-      if (stopFlag.value) break; // ✅ nếu bấm Stop thì thoát vòng lặp
-      acc.status = "Processing";
-      await exportOrdersToExcel([acc], false); // false = không download ngay
-      acc.status = "Done";
-      processedAccounts.value.push(acc);
+      if (stopFlag.value) break // ✅ nếu bấm Stop thì thoát vòng lặp
+      acc.status = 'Processing'
+      await exportOrdersToExcel([acc], false) // false = không download ngay
+      acc.status = 'Done'
+      processedAccounts.value.push(acc)
     }
 
     if (stopFlag.value) {
       // ✅ Nếu stop thì nén & download những quán đã xử lý xong
-      await exportOrdersToExcel(processedAccounts.value, true);
+      await exportOrdersToExcel(processedAccounts.value, true)
     }
 
     // ✅ Reset status về Not Start sau khi chạy hết (chỉ khi không Stop)
     if (!stopFlag.value) {
-      accounts.value.forEach((acc) => (acc.status = "Not Start"));
+      accounts.value.forEach((acc) => (acc.status = 'Not Start'))
     }
 
-    isProcessing.value = false;
+    isProcessing.value = false
   } catch (err) {
-    alert("❌ Lỗi Export: " + err.message);
+    alert('❌ Lỗi Export: ' + err.message)
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
