@@ -228,15 +228,13 @@ const route = useRoute()
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar()
 
 const menuGroups = [
-{
+  {
     title: 'Excel',
     items: [
       {
         name: 'Xuất Excel',
         icon: TaskIcon,
-        subItems: [
-          { name: 'Xuất doanh thu', path: '/revenue-export', pro: false },
-        ],
+        path: '/revenue-export',
       },
     ],
   },
