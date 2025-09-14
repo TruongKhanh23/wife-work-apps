@@ -6,6 +6,43 @@
       <!-- Upload + Export buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <!-- Select Branch -->
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Select Branch
+            </label>
+            <div class="relative z-20 bg-transparent">
+              <select
+                v-model="selectedBranch"
+                class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+              >
+                <option value="" disabled selected>Select Branch</option>
+                <option v-for="acc in accounts" :key="acc.branch" :value="acc.branch">
+                  {{ acc.branch }}
+                </option>
+              </select>
+              <span
+                class="absolute z-30 text-gray-500 -translate-y-1/2 pointer-events-none right-4 top-1/2 dark:text-gray-400"
+              >
+                <svg
+                  class="stroke-current"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396"
+                    stroke=""
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            </div>
+          </div>
           <!-- Start Date -->
           <div>
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -34,7 +71,7 @@
 
           <div>
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-              Upload New Password (if changes)
+              New Password (if changes)
             </label>
             <input
               ref="fileInput"
@@ -48,7 +85,7 @@
               :value="fileName"
               placeholder="Upload File accounts..."
               disabled
-              class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
+              class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
             />
           </div>
           <button
@@ -61,16 +98,16 @@
         <div class="flex gap-2 flex-wrap">
           <button
             @click="downloadTemplate"
-            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+            class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
           >
-            Download Sample Password
+            Sample Password
           </button>
 
           <!-- Export + Spinner -->
           <button
             @click="handleExport"
             :disabled="isLoading"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
+            class="mt-6 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
           >
             <span v-if="isLoading" class="animate-spin">
               <!-- SVG spinner -->
@@ -89,12 +126,12 @@
                 />
               </svg>
             </span>
-            {{ isLoading ? 'Đang xử lý...' : 'Export' }}
+            {{ isLoading ? 'Processing...' : 'Export' }}
           </button>
           <button
             v-if="isLoading"
             @click="stopProcessing"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-red-600 shadow-theme-xs hover:bg-red-700 sm:w-auto"
+            class="mt-6 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-red-600 shadow-theme-xs hover:bg-red-700 sm:w-auto"
           >
             Stop
           </button>
@@ -180,6 +217,7 @@ const isProcessing = ref(false)
 const stopFlag = ref(false)
 const processedAccounts = ref([])
 const isUploadedFile = ref(false)
+const selectedBranch = ref('')
 
 function stopProcessing() {
   stopFlag.value = true
@@ -266,13 +304,23 @@ async function handleExport() {
     accounts.value = await loadAccountsFromExcel('/be-export/branches_accounts.xlsx')
   }
 
+  // Lọc theo branch nếu đã chọn
+  const exportAccounts = selectedBranch.value
+    ? accounts.value.filter(acc => acc.branch === selectedBranch.value)
+    : accounts.value
+
+  if (!exportAccounts.length) {
+    alert('❌ Không có quán nào để export')
+    return
+  }
+
   isLoading.value = true
   isProcessing.value = true
   stopFlag.value = false
   processedAccounts.value = []
 
   try {
-    for (const acc of accounts.value) {
+    for (const acc of exportAccounts) {
       if (stopFlag.value) break
 
       acc.status = 'Processing'
@@ -300,7 +348,7 @@ async function handleExport() {
 
     // Reset trạng thái nếu chạy hết mà không stop
     if (!stopFlag.value) {
-      accounts.value.forEach((acc) => (acc.status = 'Not Start'))
+      exportAccounts.forEach((acc) => (acc.status = 'Not Start'))
     }
   } catch (err) {
     alert('❌ Lỗi Export: ' + err.message)
@@ -309,6 +357,7 @@ async function handleExport() {
     isLoading.value = false
   }
 }
+
 
 onMounted(async () => {
   try {
