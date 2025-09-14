@@ -10,6 +10,7 @@
             ref="fileInput"
             type="file"
             accept=".xlsx,.xls"
+            multiple
             @change="handleFileUpload"
             class="hidden"
           />
@@ -231,10 +232,10 @@ function applyStyles(ws, sheetData) {
         }
 
         if (jsDate && !isNaN(jsDate.getTime())) {
-          // Excel serial date = days since 1900-01-00
-          const excelSerialDate = Math.floor(
-            (jsDate - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000)
-          )
+          // Tính theo UTC midnight để tránh lệch timezone
+          const excelEpoch = Date.UTC(1899, 11, 30) // "1899-12-30" UTC
+          const utcDateMs = Date.UTC(jsDate.getFullYear(), jsDate.getMonth(), jsDate.getDate())
+          const excelSerialDate = Math.round((utcDateMs - excelEpoch) / (24 * 60 * 60 * 1000))
 
           ws[cellRef] = {
             t: 'n', // number (Excel date serial)
@@ -278,42 +279,69 @@ async function downloadTemplate() {
 }
 
 async function handleFileUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  fileName.value = file.name
+  const files = Array.from(e.target.files || [])
+  if (files.length === 0) return
 
-  const data = await file.arrayBuffer()
-  const workbook = XLSX.read(data, { type: 'array' })
-  const sheet = workbook.Sheets['SUMMARY']
-  if (!sheet) return alert('❌ Không tìm thấy sheet SUMMARY')
+  // Validate tên file
+  const invalidFiles = files.filter((f) => !/^\d{2}\.\d{2}\.\d{4}\.(xlsx|xls)$/i.test(f.name))
+  if (invalidFiles.length > 0) {
+    alert(
+      `❌ Tên các file sau không đúng định dạng "dd.mm.yyyy":\n${invalidFiles
+        .map((f) => f.name)
+        .join('\n')}`
+    )
+    e.target.value = '' // reset input
+    fileName.value = ''
+    return
+  }
 
-  const rowsRaw = XLSX.utils.sheet_to_json(sheet, { header: 1 }).slice(4)
+  fileName.value = files.map((f) => f.name).join(', ')
+
   const zip = new JSZip()
+  const allStoresData = {}
 
-  const dateColumnIndexes = HEADERS.reduce((acc, h, idx) => {
-    const lower = (h || '').toLowerCase()
-    const extrasLower = EXTRA_DATE_HEADERS.map((s) => s.toLowerCase())
-    if (lower.includes('ngay') || extrasLower.includes(lower)) acc.push(idx)
-    return acc
-  }, [])
-
-  rowsRaw.forEach((row) => {
-    const storeName = row[1]
-    if (!storeName) return
-
-    const sheetData = [['SoChungTu', ...HEADERS]]
-    let stt = 1
-    const blockSize = HEADERS.length
-    for (let colStart = 3; colStart < row.length; colStart += blockSize) {
-      const slice = createSheetDataSlice(
-        row.slice(colStart, colStart + blockSize),
-        dateColumnIndexes
-      )
-      const moneyValue = slice[6]
-      if (moneyValue != null && moneyValue !== '' && !isNaN(Number(moneyValue))) {
-        sheetData.push([stt++, ...slice])
-      }
+  for (const file of files) {
+    const data = await file.arrayBuffer()
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheet = workbook.Sheets['SUMMARY']
+    if (!sheet) {
+      alert(`❌ Không tìm thấy sheet SUMMARY trong file ${file.name}`)
+      continue
     }
+
+    const rowsRaw = XLSX.utils.sheet_to_json(sheet, { header: 1 }).slice(4)
+    const dateColumnIndexes = HEADERS.reduce((acc, h, idx) => {
+      const lower = (h || '').toLowerCase()
+      const extrasLower = EXTRA_DATE_HEADERS.map((s) => s.toLowerCase())
+      if (lower.includes('ngay') || extrasLower.includes(lower)) acc.push(idx)
+      return acc
+    }, [])
+
+    rowsRaw.forEach((row) => {
+      const storeName = row[1]
+      if (!storeName) return
+      if (!allStoresData[storeName]) allStoresData[storeName] = []
+
+      const blockSize = HEADERS.length
+      for (let colStart = 3; colStart < row.length; colStart += blockSize) {
+        const slice = createSheetDataSlice(
+          row.slice(colStart, colStart + blockSize),
+          dateColumnIndexes
+        )
+        const moneyValue = slice[6]
+        if (moneyValue != null && moneyValue !== '' && !isNaN(Number(moneyValue))) {
+          allStoresData[storeName].push(slice)
+        }
+      }
+    })
+  }
+
+  // Xuất file Excel cho từng quán
+  Object.entries(allStoresData).forEach(([storeName, slices]) => {
+    const sheetData = [['SoChungTu', ...HEADERS]]
+    slices.forEach((slice, idx) => {
+      sheetData.push([idx + 1, ...slice])
+    })
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData)
     applyStyles(ws, sheetData)
@@ -326,15 +354,56 @@ async function handleFileUpload(e) {
     )
   })
 
-  // 👉 Đặt tên file zip theo ngày hiện tại dd-mm-yyyy
-  const today = new Date()
-  const dd = String(today.getDate()).padStart(2, '0')
-  const mm = String(today.getMonth() + 1).padStart(2, '0')
-  const yyyy = today.getFullYear()
-  const dateStr = `${dd}-${mm}-${yyyy}`
+  // 👉 Đặt tên file zip theo logic ngày
+  function parseDateFromFileName(name) {
+    // Lấy phần tên không kèm đuôi
+    const base = name.replace(/\.[^.]+$/, '')
+    const parts = base.split('.')
+    if (parts.length === 3) {
+      const [dd, mm, yyyy] = parts.map(Number)
+      return new Date(yyyy, mm - 1, dd)
+    }
+    return null
+  }
+
+  const dates = files
+    .map((f) => parseDateFromFileName(f.name))
+    .filter((d) => d instanceof Date && !isNaN(d))
+
+  let zipName = 'result.zip'
+  if (dates.length === 1) {
+    // Trường hợp 1 file
+    zipName = files[0].name.replace(/\.[^.]+$/, '') + '.zip'
+  } else if (dates.length > 1) {
+    // Sắp xếp ngày
+    dates.sort((a, b) => a - b)
+    const format = (d) =>
+      `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(
+        2,
+        '0'
+      )}.${d.getFullYear()}`
+    const first = dates[0]
+    const last = dates[dates.length - 1]
+
+    // Kiểm tra liên tục
+    let isContinuous = true
+    for (let i = 1; i < dates.length; i++) {
+      const diff = (dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24)
+      if (diff !== 1) {
+        isContinuous = false
+        break
+      }
+    }
+
+    if (isContinuous) {
+      zipName = `${format(first)}_to_${format(last)}.zip`
+    } else {
+      zipName = dates.map(format).join('-') + '.zip'
+    }
+  }
 
   const content = await zip.generateAsync({ type: 'blob' })
-  saveAs(content, `${dateStr}.zip`)
+  saveAs(content, zipName)
 }
 
 // --- New: Download conversion tool ---
