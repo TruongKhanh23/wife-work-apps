@@ -1,28 +1,33 @@
+
 <template>
   <div
     class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
   >
     <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
-      <!-- Upload + Template buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".xlsx,.xls"
-            @change="handleFileUpload"
-            class="hidden"
-          />
-          <input
-            type="text"
-            :value="fileName"
-            placeholder="Upload File accounts..."
-            disabled
-            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
-          />
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Upload New Password (if changes)
+            </label>
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".xlsx,.xls"
+              @change="handleFileUpload"
+              class="hidden"
+            />
+            <input
+              type="text"
+              :value="fileName"
+              placeholder="Upload File accounts..."
+              disabled
+              class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
+            />
+          </div>
           <button
             @click="$refs.fileInput.click()"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
+            class="mt-6 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
           >
             Upload File
           </button>
@@ -32,19 +37,38 @@
             @click="downloadTemplate"
             class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-gray-500 shadow-theme-xs hover:bg-gray-600 sm:w-auto"
           >
-            Tải file mẫu
+            Download Sample Password
           </button>
 
+          <!-- Nút Export kèm Spinner -->
           <button
             @click="handleExport"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-green-600 shadow-theme-xs hover:bg-green-700 sm:w-auto"
+            :disabled="isLoading"
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-green-600 shadow-theme-xs hover:bg-green-700 disabled:opacity-70 sm:w-auto"
           >
-            Export
+            <span v-if="isLoading" class="animate-spin">
+              <!-- SVG spinner -->
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle opacity="0.5" cx="10" cy="10" r="8.75" stroke="white" stroke-width="2.5" />
+                <path
+                  d="M18.2372 12.9506C18.8873 13.1835 19.6113 12.846 19.7613 12.1719C20.0138 11.0369 20.0672 9.86319 19.9156 8.70384C19.7099 7.12996 19.1325 5.62766 18.2311 4.32117C17.3297 3.01467 16.1303 1.94151 14.7319 1.19042C13.7019 0.637155 12.5858 0.270357 11.435 0.103491C10.7516 0.00440265 10.179 0.561473 10.1659 1.25187C10.1528 1.94226 10.7059 2.50202 11.3845 2.6295C12.1384 2.77112 12.8686 3.02803 13.5487 3.39333C14.5973 3.95661 15.4968 4.76141 16.1728 5.74121C16.8488 6.721 17.2819 7.84764 17.4361 9.02796C17.5362 9.79345 17.5172 10.5673 17.3819 11.3223C17.2602 12.002 17.5871 12.7178 18.2372 12.9506Z"
+                  stroke="white"
+                  stroke-width="4"
+                />
+              </svg>
+            </span>
+            {{ isLoading ? 'Đang xử lý...' : 'Export' }}
           </button>
         </div>
       </div>
 
-      <!-- Hiển thị danh sách accounts sau khi upload -->
+      <!-- Table -->
       <div v-if="accounts.length" class="mt-4">
         <h3 class="font-semibold mb-2">Danh sách accounts:</h3>
         <table class="table-auto border-collapse border border-gray-300 w-full text-sm">
@@ -80,6 +104,7 @@ import { exportOrdersToExcel } from '@/utils/beExport'
 
 const fileName = ref('')
 const accounts = ref([])
+const isLoading = ref(false) // ✅ trạng thái loading
 
 async function downloadTemplate() {
   try {
@@ -103,7 +128,6 @@ async function handleFileUpload(e) {
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
-    // Bỏ dòng tiêu đề => giả định 4 cột: branch | account | password | merchantId
     accounts.value = rows
       .slice(1)
       .map((row) => ({
@@ -115,47 +139,52 @@ async function handleFileUpload(e) {
       .filter((acc) => acc.branch && acc.account)
 
     if (accounts.value.length) {
-      // 🔥 Gọi logic export BE
+      isLoading.value = true
       await exportOrdersToExcel(accounts.value)
       alert('✅ Xuất file BE thành công')
     }
   } catch (err) {
     alert('❌ Lỗi đọc file Excel: ' + err.message)
+  } finally {
+    isLoading.value = false
   }
 }
 
 async function handleExport() {
   try {
+    isLoading.value = true
     if (accounts.value.length) {
-      // Đã có file upload => xuất trực tiếp
       await exportOrdersToExcel(accounts.value)
-      alert("✅ Xuất file BE thành công")
+      alert('✅ Xuất file BE thành công')
       return
     }
 
-    // Chưa upload file => dùng file mặc định
-    const response = await fetch("/be-export/branches_accounts.xlsx")
-    if (!response.ok) throw new Error("Không tìm thấy file mặc định")
+    const response = await fetch('/be-export/branches_accounts.xlsx')
+    if (!response.ok) throw new Error('Không tìm thấy file mặc định')
 
     const data = await response.arrayBuffer()
-    const workbook = XLSX.read(data, { type: "array" })
+    const workbook = XLSX.read(data, { type: 'array' })
     const sheet = workbook.Sheets[workbook.SheetNames[0]]
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
 
-    const defaultAccounts = rows.slice(1).map((row) => ({
-      branch: row[0],
-      account: row[1],
-      password: row[2],
-      merchantId: row[3],
-    })).filter(acc => acc.branch && acc.account)
+    const defaultAccounts = rows
+      .slice(1)
+      .map((row) => ({
+        branch: row[0],
+        account: row[1],
+        password: row[2],
+        merchantId: row[3],
+      }))
+      .filter((acc) => acc.branch && acc.account)
 
-    if (!defaultAccounts.length) throw new Error("File mặc định không có dữ liệu")
+    if (!defaultAccounts.length) throw new Error('File mặc định không có dữ liệu')
 
     await exportOrdersToExcel(defaultAccounts)
-    alert("✅ Xuất file BE thành công (dùng file mặc định)")
+    alert('✅ Xuất file BE thành công (dùng file mặc định)')
   } catch (err) {
-    alert("❌ Lỗi Export: " + err.message)
+    alert('❌ Lỗi Export: ' + err.message)
+  } finally {
+    isLoading.value = false
   }
 }
-
 </script>
