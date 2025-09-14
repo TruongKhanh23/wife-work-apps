@@ -13,6 +13,8 @@ const STORE_URL =
   'https://gw.be.com.vn/api/v1/be-merchant-gateway/v2/merchant/get_stores_of_merchant'
 const ORDER_URL =
   'https://gw.be.com.vn/api/v1/be-merchant-gateway/v2/merchant/get_restaurant_orders'
+const ORDER_DETAIL_URL =
+  'https://gw.be.com.vn/api/v1/be-merchant-gateway/v2/merchant/get_restaurant_order'
 
 const OPERATOR_TOKEN = '0b28e008bc323838f5ec84f718ef11e6'
 const USER_ID = 77550
@@ -87,6 +89,27 @@ async function fetchOrders(token, store_id, date, account) {
   return res.data.restaurant_orders || []
 }
 
+async function fetchOrderDetail(token, store_id, order_id, account) {
+  const body = {
+    operator_token: OPERATOR_TOKEN,
+    device_type: DEVICE_TYPE,
+    access_token: token,
+    merchant_id: account.merchantId,
+    order_id,
+    user_id: USER_ID,
+    restaurant_id: store_id,
+    locale: 'vi',
+    device_token: '',
+  }
+  const res = await axios.post(ORDER_DETAIL_URL, body)
+  return res.data?.order || null
+}
+
+// ==== EXPORT ORDERS ====
+/**
+ * @param {Array} accounts - danh sách account
+ * @param {Boolean} shouldDownload - true: download zip, false: chỉ update status
+ */
 // ==== EXPORT ORDERS ====
 /**
  * @param {Array} accounts - danh sách account
@@ -127,23 +150,25 @@ export async function exportOrdersToExcel(accounts, shouldDownload = true) {
           { header: 'item_name', key: 'item_name', width: 30 },
           { header: 'quantity', key: 'quantity', width: 10 },
           { header: 'size', key: 'size', width: 15 },
+          { header: 'phi_dv_tmdt', key: 'phi_dv_tmdt', width: 15 },
+          { header: 'khuyen_mai', key: 'khuyen_mai', width: 15 },
+          { header: 'thue', key: 'thue', width: 15 },
         ]
 
         for (const order of orders) {
-          for (const item of order.order_items || []) {
+          const orderDetail = await fetchOrderDetail(token, store_id, order.order_id, account)
+          const orderItems = orderDetail?.order_items || order.order_items || []
+
+          orderItems.forEach((item, index) => {
             let size = 'Không rõ'
             const customize = item.customize_object || ''
 
-            // 1️⃣ Kiểm tra customize_object trước
             const matchCustomize = customize.match(/Size\s*(lớn|nhỏ)/i)
-            if (matchCustomize) {
-              size = matchCustomize[1].toLowerCase()
-            } else {
-              // 2️⃣ Nếu không có, lấy từ item_name
+            if (matchCustomize) size = matchCustomize[1].toLowerCase()
+            else {
               const matchName = item.item_name.match(/-\s*(lớn|nhỏ)/i)
               if (matchName) size = matchName[1].toLowerCase()
             }
-
 
             sheet.addRow({
               restaurant_id: store_id,
@@ -151,8 +176,12 @@ export async function exportOrdersToExcel(accounts, shouldDownload = true) {
               item_name: item.item_name,
               quantity: item.quantity,
               size,
+              phi_dv_tmdt: index === 0 ? orderDetail?.jugnoo_commission || 0 : '',
+              khuyen_mai: index === 0 ? orderDetail?.joint_promo?.total_amount || 0 : '',
+              thue:
+                index === 0 ? (orderDetail?.vat_amount || 0) + (orderDetail?.pit_amount || 0) : '',
             })
-          }
+          })
         }
 
         await new Promise((r) => setTimeout(r, 200)) // tránh rate limit
