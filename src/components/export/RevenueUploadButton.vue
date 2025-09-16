@@ -23,11 +23,30 @@
           />
           <button
             @click="$refs.fileInput.click()"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
+            :disabled="isLoading"
+            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
           >
-            Upload File
+            <span v-if="isLoading" class="animate-spin">
+              <!-- SVG spinner -->
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle opacity="0.5" cx="10" cy="10" r="8.75" stroke="white" stroke-width="2.5" />
+                <path
+                  d="M18.2372 12.9506C18.8873 13.1835 19.6113 12.846 19.7613 12.1719C20.0138 11.0369 20.0672 9.86319 19.9156 8.70384C19.7099 7.12996 19.1325 5.62766 18.2311 4.32117C17.3297 3.01467 16.1303 1.94151 14.7319 1.19042C13.7019 0.637155 12.5858 0.270357 11.435 0.103491C10.7516 0.00440265 10.179 0.561473 10.1659 1.25187C10.1528 1.94226 10.7059 2.50202 11.3845 2.6295C12.1384 2.77112 12.8686 3.02803 13.5487 3.39333C14.5973 3.95661 15.4968 4.76141 16.1728 5.74121C16.8488 6.721 17.2819 7.84764 17.4361 9.02796C17.5362 9.79345 17.5172 10.5673 17.3819 11.3223C17.2602 12.002 17.5871 12.7178 18.2372 12.9506Z"
+                  stroke="white"
+                  stroke-width="4"
+                />
+              </svg>
+            </span>
+            {{ isLoading ? 'Processing...' : 'Upload File' }}
           </button>
         </div>
+
         <div class="flex gap-2 flex-wrap">
           <button
             @click="downloadTemplate"
@@ -84,6 +103,7 @@ import { saveAs } from 'file-saver'
 
 const fileName = ref('')
 const fileInput = ref(null)
+const isLoading = ref(false)
 
 // --- Constants ---
 const HEADERS = [
@@ -157,7 +177,7 @@ function excelDateToString(val) {
     if (!isNaN(parsed.getTime()))
       return `${String(parsed.getDate()).padStart(2, '0')}/${String(parsed.getMonth() + 1).padStart(
         2,
-        '0'
+        '0',
       )}/${parsed.getFullYear()}`
   }
   return val
@@ -279,18 +299,15 @@ async function downloadTemplate() {
 }
 
 async function handleFileUpload(e) {
-  const files = Array.from(e.target.files || [])
+  isLoading.value = true;
+  let files = Array.from(e.target.files || [])
   if (files.length === 0) return
 
-  // Validate tên file
+  // validate tên file như cũ...
   const invalidFiles = files.filter((f) => !/^\d{2}\.\d{2}\.\d{4}\.(xlsx|xls)$/i.test(f.name))
   if (invalidFiles.length > 0) {
-    alert(
-      `❌ Tên các file sau không đúng định dạng "dd.mm.yyyy":\n${invalidFiles
-        .map((f) => f.name)
-        .join('\n')}`
-    )
-    e.target.value = '' // reset input
+    alert(`❌ Tên file sai: \n${invalidFiles.map((f) => f.name).join('\n')}`)
+    e.target.value = ''
     fileName.value = ''
     return
   }
@@ -300,7 +317,22 @@ async function handleFileUpload(e) {
   const zip = new JSZip()
   const allStoresData = {}
 
-  for (const file of files) {
+  // 👉 Sort files theo ngày
+  function parseDateFromFileName(name) {
+    const base = name.replace(/\.[^.]+$/, '')
+    const parts = base.split('.')
+    if (parts.length === 3) {
+      const [dd, mm, yyyy] = parts.map(Number)
+      return new Date(yyyy, mm - 1, dd)
+    }
+    return null
+  }
+  files = files.sort((a, b) => parseDateFromFileName(a.name) - parseDateFromFileName(b.name))
+
+  let lastSoChungTuGlobal = null
+
+  // Đọc từng file input (theo ngày đã sort)
+  for (const [fileIdx, file] of files.entries()) {
     const data = await file.arrayBuffer()
     const workbook = XLSX.read(data, { type: 'array' })
     const sheet = workbook.Sheets['SUMMARY']
@@ -320,28 +352,41 @@ async function handleFileUpload(e) {
     rowsRaw.forEach((row) => {
       const storeName = row[1]
       if (!storeName) return
-      if (!allStoresData[storeName]) allStoresData[storeName] = []
+
+      // 👉 Nếu chưa có store thì khởi tạo
+      if (!allStoresData[storeName]) {
+        // nếu là file đầu tiên → lấy từ cột 3, còn lại → kế thừa global
+        const initSoChungTu = fileIdx === 0 ? Number(row[3]) || 0 : lastSoChungTuGlobal || 0
+        allStoresData[storeName] = { slices: [], lastSoChungTu: initSoChungTu }
+      }
 
       const blockSize = HEADERS.length
-      for (let colStart = 3; colStart < row.length; colStart += blockSize) {
+      for (let colStart = 4; colStart < row.length; colStart += blockSize) {
         const slice = createSheetDataSlice(
           row.slice(colStart, colStart + blockSize),
-          dateColumnIndexes
+          dateColumnIndexes,
         )
         const moneyValue = slice[6]
         if (moneyValue != null && moneyValue !== '' && !isNaN(Number(moneyValue))) {
-          allStoresData[storeName].push(slice)
+          allStoresData[storeName].slices.push(slice)
         }
       }
     })
   }
 
   // Xuất file Excel cho từng quán
-  Object.entries(allStoresData).forEach(([storeName, slices]) => {
+  Object.entries(allStoresData).forEach(([storeName, data]) => {
+    const { slices, lastSoChungTu } = data
     const sheetData = [['SoChungTu', ...HEADERS]]
-    slices.forEach((slice, idx) => {
-      sheetData.push([idx + 1, ...slice])
+
+    let soChungTu = lastSoChungTu
+    slices.forEach((slice) => {
+      soChungTu++
+      sheetData.push([soChungTu, ...slice])
     })
+
+    data.finalSoChungTu = soChungTu
+    lastSoChungTuGlobal = soChungTu // 👉 cập nhật cho file kế tiếp
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData)
     applyStyles(ws, sheetData)
@@ -350,13 +395,36 @@ async function handleFileUpload(e) {
     XLSX.utils.book_append_sheet(newWb, ws, 'Sheet1')
     zip.file(
       `${toSnakeCaseFileName(storeName)}.xlsx`,
-      XLSX.write(newWb, { type: 'array', bookType: 'xlsx' })
+      XLSX.write(newWb, { type: 'array', bookType: 'xlsx' }),
     )
   })
 
+  // 👉 Sinh thêm file input đã cập nhật (cột 3 = SoChungTu cuối)
+  for (const file of files) {
+    const data = await file.arrayBuffer()
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheet = workbook.Sheets['SUMMARY']
+    const rowsRaw = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+    for (let i = 4; i < rowsRaw.length; i++) {
+      const row = rowsRaw[i]
+      const storeName = row[1]
+      if (storeName && allStoresData[storeName]) {
+        row[3] = allStoresData[storeName].finalSoChungTu
+      }
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rowsRaw)
+    workbook.Sheets['SUMMARY'] = ws
+
+    zip.file(
+      `${file.name.replace(/\.[^.]+$/, '')}_last_export.xlsx`,
+      XLSX.write(workbook, { type: 'array', bookType: 'xlsx' }),
+    )
+  }
+
   // 👉 Đặt tên file zip theo logic ngày
   function parseDateFromFileName(name) {
-    // Lấy phần tên không kèm đuôi
     const base = name.replace(/\.[^.]+$/, '')
     const parts = base.split('.')
     if (parts.length === 3) {
@@ -372,20 +440,17 @@ async function handleFileUpload(e) {
 
   let zipName = 'result.zip'
   if (dates.length === 1) {
-    // Trường hợp 1 file
     zipName = files[0].name.replace(/\.[^.]+$/, '') + '.zip'
   } else if (dates.length > 1) {
-    // Sắp xếp ngày
     dates.sort((a, b) => a - b)
     const format = (d) =>
       `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(
         2,
-        '0'
+        '0',
       )}.${d.getFullYear()}`
     const first = dates[0]
     const last = dates[dates.length - 1]
 
-    // Kiểm tra liên tục
     let isContinuous = true
     for (let i = 1; i < dates.length; i++) {
       const diff = (dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24)
@@ -404,6 +469,7 @@ async function handleFileUpload(e) {
 
   const content = await zip.generateAsync({ type: 'blob' })
   saveAs(content, zipName)
+  isLoading.value = false;
 }
 
 // --- New: Download conversion tool ---
