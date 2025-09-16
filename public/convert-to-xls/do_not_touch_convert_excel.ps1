@@ -46,7 +46,7 @@ Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
     # Gán giá trị 0 cho toàn bộ cột 7
     $usedRange = $sheet.UsedRange
     $lastRow = $usedRange.Rows.Count
-    $sheet.Range("G2:G$lastRow").Value2 = 0   # từ dòng 2 đến hết (giữ header dòng 1)
+    $sheet.Range("G2:G$lastRow").Value2 = ''   # từ dòng 2 đến hết (giữ header dòng 1)
 
     # Lưu sang xls
     $newName = Join-Path $dst ($_.BaseName + ".xls")
