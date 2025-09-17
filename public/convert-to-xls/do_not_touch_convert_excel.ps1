@@ -9,7 +9,7 @@ if ([string]::IsNullOrWhiteSpace($srcFolderInput)) {
     $srcFolderInput = $today
 }
 
-# Thư mục nguồn và đích
+# Source and destination folders
 $src = Join-Path $PSScriptRoot $srcFolderInput
 $dst = Join-Path $PSScriptRoot ("$srcFolderInput-Converted")
 
