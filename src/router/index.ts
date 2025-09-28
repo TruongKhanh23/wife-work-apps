@@ -7,6 +7,14 @@ const router = createRouter({
   },
   routes: [
     {
+      path: '/cost-export',
+      name: 'Cost Export',
+      component: () => import('../views/Export/CostExport.vue'),
+      meta: {
+        title: 'Cost Export',
+      },
+    },
+    {
       path: '/revenue-export',
       name: 'Revenue Export',
       component: () => import('../views/Export/RevenueExport.vue'),

@@ -232,6 +232,11 @@ const menuGroups = [
     title: 'Excel',
     items: [
       {
+        name: 'Cost Export',
+        icon: TaskIcon,
+        path: '/cost-export',
+      },
+      {
         name: 'Revenue Export',
         icon: TaskIcon,
         path: '/revenue-export',
