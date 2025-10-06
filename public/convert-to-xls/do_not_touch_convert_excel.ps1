@@ -41,7 +41,16 @@ Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
     $sheet.Columns.Item(7).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* "0"_);_(@_)'
     $sheet.Columns.Item(8).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* "-"??_);_(@_)'
     $sheet.Columns.Item(22).NumberFormat = "@"
-    $sheet.Columns.Item(30).NumberFormat = "dd/mm/yyyy"
+    $sheet.Columns.Item(30).NumberFormat = "@"   # đặt kiểu Text
+    $lastRow = $sheet.UsedRange.Rows.Count
+    $range = $sheet.Range("AD2:AD$lastRow")      # cột 30 = AD
+
+    foreach ($cell in $range) {
+        if ($cell.Value2 -ne $null) {
+            $date = [datetime]::FromOADate($cell.Value2)  # nếu ô hiện tại là Excel date
+            $cell.Value2 = $date.ToString("dd/MM/yyyy")    # chuyển thành string
+        }
+    }
 
     # Gán giá trị 0 cho toàn bộ cột 7
     $usedRange = $sheet.UsedRange
