@@ -4,7 +4,7 @@
 
       <!-- Upload + template -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <AddDonviColumnFileInput
+        <FileInput
           v-model:fileName="fileName"
           :isLoading="isLoading"
           @upload="handleFileUpload"
@@ -20,14 +20,14 @@
 
 <script setup>
 import { ref } from 'vue'
-import AddDonviColumnFileInput from './AddDonviColumnFileInput.vue'
+import FileInput from '@/components/common/FileInput.vue'
 import AddDonviColumnGuide from './AddDonviColumnGuide.vue'
 import useRevenueExport from '@/composables/useRevenueExport'
 
 const fileName = ref('')
 const isLoading = ref(false)
 
-const { handleFileUpload, downloadConversionTool } = useRevenueExport({
+const { handleFileUpload } = useRevenueExport({
   fileName,
   isLoading,
 })
