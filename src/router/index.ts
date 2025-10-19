@@ -7,6 +7,14 @@ const router = createRouter({
   },
   routes: [
     {
+      path: '/add-donvi-column',
+      name: 'Add Donvi Column',
+      component: () => import('../views/Tools/AddDonviColumn.vue'),
+      meta: {
+        title: 'Add Donvi Column',
+      },
+    },
+    {
       path: '/cost-export',
       name: 'Cost Export',
       component: () => import('../views/Export/CostExport.vue'),
