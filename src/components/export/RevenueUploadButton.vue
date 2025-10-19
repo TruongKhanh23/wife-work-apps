@@ -300,7 +300,7 @@ async function downloadTemplate() {
 }
 
 async function handleFileUpload(e) {
-  isLoading.value = true;
+  isLoading.value = true
   let files = Array.from(e.target.files || [])
   if (files.length === 0) return
 
@@ -400,6 +400,27 @@ async function handleFileUpload(e) {
     )
   })
 
+  // 👉 Thêm file tổng hợp
+  const allCombinedData = [['SoChungTu', ...HEADERS, 'TenQuan']]
+
+  Object.entries(allStoresData).forEach(([storeName, data]) => {
+    const { slices, lastSoChungTu } = data
+    let soChungTu = lastSoChungTu - slices.length + 1 // hoặc lấy lại từ store data
+    slices.forEach((slice) => {
+      allCombinedData.push([soChungTu++, ...slice, storeName])
+    })
+  })
+
+  // Tạo sheet và format tương tự
+  const wsTotal = XLSX.utils.aoa_to_sheet(allCombinedData)
+  applyStyles(wsTotal, allCombinedData)
+
+  const wbTotal = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wbTotal, wsTotal, 'TongHop')
+
+  // Ghi vào file ZIP
+  zip.file(`TongHop.xlsx`, XLSX.write(wbTotal, { type: 'array', bookType: 'xlsx' }))
+
   // 👉 Sinh thêm file input đã cập nhật (cột 3 = SoChungTu cuối)
   for (const file of files) {
     const data = await file.arrayBuffer()
@@ -470,7 +491,7 @@ async function handleFileUpload(e) {
 
   const content = await zip.generateAsync({ type: 'blob' })
   saveAs(content, zipName)
-  isLoading.value = false;
+  isLoading.value = false
 }
 
 // --- New: Download conversion tool ---
