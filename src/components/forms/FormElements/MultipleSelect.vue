@@ -1,165 +1,267 @@
 <template>
-  <div class="relative" ref="multiSelectRef">
-    <div
-      @click="toggleDropdown"
-      class="dark:bg-dark-900 h-11 flex items-center w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-      :class="{ 'text-gray-800 dark:text-white/90': isOpen }"
-    >
-      <span v-if="selectedItems.length === 0" class="text-gray-400"> Select items... </span>
-      <div class="flex flex-wrap items-center flex-auto gap-2">
+  <div class="w-full" :class="customClass">
+    <div ref="triggerRef">
+      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+        <slot name="label" />
+      </label>
+
+      <!-- Input field -->
+      <div class="relative" @click="focusInput">
         <div
-          v-for="item in selectedItems"
-          :key="item.value"
-          class="group flex items-center justify-center h-[30px] rounded-full border-[0.7px] border-transparent bg-gray-100 py-1 pl-2.5 pr-2 text-sm text-gray-800 hover:border-gray-200 dark:bg-gray-800 dark:text-white/90 dark:hover:border-gray-800"
+          class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800
+                 relative h-11 w-full cursor-text rounded-lg border border-gray-300 px-4 py-3 text-left text-sm
+                 focus:ring-3 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50
+                 dark:border-gray-700 dark:bg-gray-900"
+          :class="[
+            isDisabled
+              ? 'bg-gray-50 text-gray-800 placeholder:text-gray-300'
+              : 'bg-transparent text-gray-800 placeholder:text-gray-400 dark:text-white/90 dark:placeholder:text-white/30',
+          ]"
         >
-          <span>{{ item.label }}</span>
-          <button
-            @click.stop="removeItem(item)"
-            class="pl-2 text-gray-500 cursor-pointer group-hover:text-gray-400 dark:text-gray-400"
-            aria-label="Remove item"
+          <input
+            ref="inputRef"
+            v-model="search"
+            type="text"
+            :readonly="!isOpen"
+            :disabled="isDisabled"
+            :placeholder="selectedLabels.length ? '' : 'Vui lòng chọn'"
+            class="w-full bg-transparent focus:outline-none pr-6"
+            @focus="handleFocus"
+            @keydown.stop
           >
-            <svg
-              role="button"
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M3.40717 4.46881C3.11428 4.17591 3.11428 3.70104 3.40717 3.40815C3.70006 3.11525 4.17494 3.11525 4.46783 3.40815L6.99943 5.93975L9.53095 3.40822C9.82385 3.11533 10.2987 3.11533 10.5916 3.40822C10.8845 3.70112 10.8845 4.17599 10.5916 4.46888L8.06009 7.00041L10.5916 9.53193C10.8845 9.82482 10.8845 10.2997 10.5916 10.5926C10.2987 10.8855 9.82385 10.8855 9.53095 10.5926L6.99943 8.06107L4.46783 10.5927C4.17494 10.8856 3.70006 10.8856 3.40717 10.5927C3.11428 10.2998 3.11428 9.8249 3.40717 9.53201L5.93877 7.00041L3.40717 4.46881Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
+          <span
+            v-if="!isOpen && selectedLabels.length"
+            class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm text-gray-800 dark:text-white"
+          >
+            {{ selectedLabels.join(', ') }}
+          </span>
+
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <ChevronDownIcon />
+          </span>
         </div>
       </div>
-      <svg
-        class="ml-auto"
-        :class="{ 'transform rotate-180': isOpen }"
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M4.79175 7.39551L10.0001 12.6038L15.2084 7.39551"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </div>
-    <transition
-      enter-active-class="transition duration-100 ease-out"
-      enter-from-class="transform scale-95 opacity-0"
-      enter-to-class="transform scale-100 opacity-100"
-      leave-active-class="transition duration-75 ease-in"
-      leave-from-class="transform scale-100 opacity-100"
-      leave-to-class="transform scale-95 opacity-0"
-    >
-      <div
-        v-if="isOpen"
-        class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-sm dark:bg-gray-900"
-      >
-        <ul
-          class="overflow-y-auto divide-y divide-gray-200 custom-scrollbar max-h-60 dark:divide-gray-800"
-          role="listbox"
-          aria-multiselectable="true"
-        >
-          <li
-            v-for="item in props.options"
-            :key="item.value"
-            @click="toggleItem(item)"
-            class="relative flex items-center w-full px-3 py-2 border-transparent cursor-pointer first:rounded-t-lg last:rounded-b-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-            :class="{ 'bg-gray-50 dark:bg-white/[0.03]': isSelected(item) }"
-            role="option"
-            :aria-selected="isSelected(item)"
+
+      <!-- Dropdown -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div
+            v-if="isOpen"
+            ref="dropdownEl"
+            class="absolute z-9999 mt-1 overflow-hidden rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            :style="dropdownStyle"
           >
-            <span class="grow">{{ item.label }}</span>
-            <svg
-              v-if="isSelected(item)"
-              class="w-5 h-5 text-gray-400 dark:text-gray-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              ></path>
-            </svg>
-          </li>
-        </ul>
-      </div>
-    </transition>
+            <div class="max-h-96 overflow-y-auto">
+
+              <!-- ✅ Select All / Unselect All -->
+              <div
+                v-if="isMulti && filteredOptions.length"
+                class="flex h-11 items-center px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 cursor-pointer border-b border-gray-200 dark:border-gray-700"
+                @click.stop="toggleSelectAll"
+              >
+                <CheckboxIcon :checked="isAllSelected" />
+                <span class="ml-3">
+                  {{ isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả' }}
+                </span>
+              </div>
+
+              <div v-if="filteredOptions.length">
+                <div
+                  v-for="option in filteredOptions"
+                  :key="option.value"
+                  class="flex h-11 items-center px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  @click="toggleOption(option.value)"
+                >
+                  <div class="flex w-full cursor-pointer items-center space-x-3">
+                    <CheckboxIcon
+                      v-if="isMulti"
+                      :checked="Array.isArray(modelValue) && modelValue.includes(option.value)"
+                    />
+                    <span>{{ option.label }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="flex h-11 items-center px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                <span>Không tìm thấy kết quả phù hợp</span>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
+      <p v-if="errorMessage" class="mt-1 text-sm text-red-500">
+        {{ errorMessage }}
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue';
+import { removeDiacritics } from '@/composables/useString.ts';
+import CheckboxIcon from '@/icons/CheckboxIcon.vue';
+import { ChevronDownIcon } from '@/icons';
 
 const props = defineProps({
-  options: {
-    type: Array,
-    required: true,
-  },
+  inputId: String,
   modelValue: {
+    type: [Array, String, Number],
+    default: () => [],
+  },
+  options: {
     type: Array,
     default: () => [],
   },
-})
+  customClass: {
+    type: [String, Array],
+    default: '',
+  },
+  errorMessage: String,
+  isDisabled: Boolean,
+  isMulti: {
+    type: Boolean,
+    default: true,
+  },
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
-const isOpen = ref(false)
-const selectedItems = ref(props.modelValue)
-const multiSelectRef = ref(null)
+const isOpen = ref(false);
+const search = ref('');
+const triggerRef = ref(null);
+const inputRef = ref(null);
+const dropdownEl = ref(null);
+const dropdownStyle = ref({});
 
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value
-}
-
-const toggleItem = (item) => {
-  const index = selectedItems.value.findIndex((selected) => selected.value === item.value)
-  if (index === -1) {
-    selectedItems.value.push(item)
-  } else {
-    selectedItems.value.splice(index, 1)
-  }
-  emit('update:modelValue', selectedItems.value)
-}
-
-const removeItem = (item) => {
-  const index = selectedItems.value.findIndex((selected) => selected.value === item.value)
-  if (index !== -1) {
-    selectedItems.value.splice(index, 1)
-    emit('update:modelValue', selectedItems.value)
-  }
-}
-
-const isSelected = (item) => {
-  return selectedItems.value.some((selected) => selected.value === item.value)
-}
-
-const handleClickOutside = (event) => {
-  if (multiSelectRef.value && !multiSelectRef.value.contains(event.target)) {
-    isOpen.value = false
-  }
-}
+// 🟢 Computed: kiểm tra đã chọn hết chưa
+const isAllSelected = computed(() => {
+  if (!Array.isArray(props.modelValue)) return false;
+  const allValues = props.options.map(o => o.value);
+  return allValues.length > 0 && allValues.every(v => props.modelValue.includes(v));
+});
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
+  if (props.isMulti && Array.isArray(props.modelValue) && props.modelValue.length === 0) {
+    // Mặc định chọn tất cả
+    emit('update:modelValue', props.options.map(o => o.value));
+  }
+});
 
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+// 🟢 Hàm toggle select all
+function toggleSelectAll() {
+  if (isAllSelected.value) {
+    emit('update:modelValue', []); // unselect all
+  } else {
+    emit('update:modelValue', props.options.map(o => o.value)); // select all
+  }
+}
+
+function calculateDropdownWidth() {
+  if (!dropdownEl.value) return 0;
+  const temp = document.createElement('div');
+  temp.style.position = 'absolute';
+  temp.style.visibility = 'hidden';
+  temp.style.whiteSpace = 'nowrap';
+  temp.style.fontSize = '0.875rem';
+  temp.style.padding = '0 1rem';
+  document.body.appendChild(temp);
+
+  let maxWidth = 0;
+  const options = filteredOptions.value.length ? filteredOptions.value : [{ label: 'Không tìm thấy kết quả phù hợp' }];
+  options.forEach((opt) => {
+    temp.textContent = opt.label;
+    const w = temp.offsetWidth + (props.isMulti ? 24 : 0);
+    maxWidth = Math.max(maxWidth, w);
+  });
+  document.body.removeChild(temp);
+
+  const inputWidth = triggerRef.value?.getBoundingClientRect().width || 0;
+  return Math.max(maxWidth + 8, inputWidth);
+}
+
+function updateDropdownPosition() {
+  if (!triggerRef.value || !dropdownEl.value) return;
+  const rect = triggerRef.value.getBoundingClientRect();
+  const dropdownHeight = dropdownEl.value.getBoundingClientRect().height;
+  const windowHeight = window.innerHeight;
+  const spaceBelow = windowHeight - rect.bottom;
+  const spaceAbove = rect.top;
+
+  let top;
+  if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+    top = rect.top + window.scrollY - dropdownHeight;
+  } else {
+    top = rect.bottom + window.scrollY;
+  }
+
+  const dropdownWidth = calculateDropdownWidth();
+  dropdownStyle.value = {
+    position: 'absolute',
+    top: `${top}px`,
+    left: `${rect.left + window.scrollX}px`,
+    width: `${dropdownWidth}px`,
+  };
+}
+
+watch(isOpen, (open) => {
+  if (open) {
+    nextTick(updateDropdownPosition);
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('scroll', updateDropdownPosition, true);
+    window.addEventListener('resize', updateDropdownPosition);
+  } else {
+    document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('scroll', updateDropdownPosition, true);
+    window.removeEventListener('resize', updateDropdownPosition);
+    search.value = '';
+  }
+});
+
+function toggleOption(value) {
+  if (props.isMulti) {
+    const current = Array.isArray(props.modelValue) ? [...props.modelValue] : [];
+    const idx = current.indexOf(value);
+    idx >= 0 ? current.splice(idx, 1) : current.push(value);
+    emit('update:modelValue', current);
+  } else {
+    emit('update:modelValue', value);
+    isOpen.value = false;
+  }
+}
+
+function focusInput() {
+  if (!isOpen.value && !props.isDisabled) {
+    isOpen.value = true;
+    nextTick(() => inputRef.value?.focus());
+  }
+}
+
+function handleClickOutside(e) {
+  if (!triggerRef.value?.contains(e.target) && !dropdownEl.value?.contains(e.target)) {
+    isOpen.value = false;
+  }
+}
+
+const filteredOptions = computed(() =>
+  props.options.filter((opt) =>
+    removeDiacritics(opt.label.toLowerCase()).includes(removeDiacritics(search.value.toLowerCase()))
+  )
+);
+
+const selectedLabels = computed(() => {
+  if (props.isMulti) {
+    return props.options.filter((opt) => props.modelValue.includes(opt.value)).map((opt) => opt.label);
+  } else {
+    const found = props.options.find((opt) => opt.value === props.modelValue);
+    return found ? [found.label] : [];
+  }
+});
+
+watch(filteredOptions, () => {
+  if (isOpen.value) nextTick(updateDropdownPosition);
+});
 </script>

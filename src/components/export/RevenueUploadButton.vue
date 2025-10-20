@@ -6,51 +6,49 @@
       <!-- Upload + Template buttons -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".xlsx,.xls"
-            multiple
-            @change="handleFileUpload"
-            class="hidden"
-          />
-          <input
-            type="text"
-            :value="fileName"
-            placeholder="Upload File..."
-            disabled
-            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
-          />
-          <button
-            @click="$refs.fileInput.click()"
-            :disabled="isLoading"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
-          >
-            <span v-if="isLoading" class="animate-spin">
-              <!-- SVG spinner -->
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              Select Branch
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                ref="fileInput"
+                type="file"
+                accept=".xlsx,.xls"
+                multiple
+                @change="handleFileUpload"
+                class="hidden"
+              />
+              <input
+                type="text"
+                :value="fileName"
+                placeholder="Upload File..."
+                disabled
+                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
+              />
+              <button
+                @click="$refs.fileInput.click()"
+                :disabled="isLoading"
+                class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
               >
-                <circle opacity="0.5" cx="10" cy="10" r="8.75" stroke="white" stroke-width="2.5" />
-                <path
-                  d="M18.2372 12.9506C18.8873 13.1835 19.6113 12.846 19.7613 12.1719C20.0138 11.0369 20.0672 9.86319 19.9156 8.70384C19.7099 7.12996 19.1325 5.62766 18.2311 4.32117C17.3297 3.01467 16.1303 1.94151 14.7319 1.19042C13.7019 0.637155 12.5858 0.270357 11.435 0.103491C10.7516 0.00440265 10.179 0.561473 10.1659 1.25187C10.1528 1.94226 10.7059 2.50202 11.3845 2.6295C12.1384 2.77112 12.8686 3.02803 13.5487 3.39333C14.5973 3.95661 15.4968 4.76141 16.1728 5.74121C16.8488 6.721 17.2819 7.84764 17.4361 9.02796C17.5362 9.79345 17.5172 10.5673 17.3819 11.3223C17.2602 12.002 17.5871 12.7178 18.2372 12.9506Z"
-                  stroke="white"
-                  stroke-width="4"
-                />
-              </svg>
-            </span>
-            {{ isLoading ? 'Processing...' : 'Upload File' }}
-          </button>
+                <span v-if="isLoading" class="animate-spin">
+                  <!-- SVG spinner -->
+                </span>
+                {{ isLoading ? 'Processing...' : 'Upload File' }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="flex min-w-[600px]">
+          <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
+            <template #label> Select Channels </template>
+          </MultipleSelect>
         </div>
 
         <div class="flex gap-2 flex-wrap">
           <button
             @click="downloadTemplate"
-            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+            class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
           >
             Download sample file
           </button>
@@ -100,10 +98,30 @@ import { ref } from 'vue'
 import * as XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
 
 const fileName = ref('')
 const fileInput = ref(null)
 const isLoading = ref(false)
+
+// --- Filter Options ---
+const channels = [
+  {
+    label: 'Tiền mặt',
+    value: 'Tiền mặt',
+  },
+  { label: 'Momo', value: 'Momo' },
+  { label: 'GrabFood', value: 'GrabFood' },
+  { label: 'BeFood', value: 'BeFood' },
+  { label: 'ZaloPay', value: 'ZaloPay' },
+  { label: 'XanhSM', value: 'XanhSM' },
+  { label: 'Vill', value: 'Vill' },
+  { label: 'Ryo', value: 'Ryo' },
+  { label: 'VNPay', value: 'VNPay' },
+  { label: 'ShopeeFood', value: 'ShopeeFood' },
+]
+
+const selectedChannels = ref([])
 
 // --- Constants ---
 const HEADERS = [
@@ -378,10 +396,20 @@ async function handleFileUpload(e) {
   // Xuất file Excel cho từng quán
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
+
+    // 👉 Lọc theo selectedChannels
+    const filteredSlices = slices.filter((slice) => {
+      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
+      // Nếu người dùng chọn tất cả, không lọc gì cả
+      if (selectedChannels.value.length === channels.length) return true
+      // Chỉ lấy dòng có chứa ít nhất một từ trong danh sách chọn
+      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
+    })
+
     const sheetData = [['SoChungTu', ...HEADERS]]
 
     let soChungTu = lastSoChungTu
-    slices.forEach((slice) => {
+    filteredSlices.forEach((slice) => {
       soChungTu++
       sheetData.push([soChungTu, ...slice])
     })
@@ -405,8 +433,15 @@ async function handleFileUpload(e) {
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
-    let soChungTu = lastSoChungTu - slices.length + 1 // hoặc lấy lại từ store data
-    slices.forEach((slice) => {
+
+    const filteredSlices = slices.filter((slice) => {
+      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
+      if (selectedChannels.value.length === channels.length) return true
+      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
+    })
+
+    let soChungTu = lastSoChungTu - filteredSlices.length + 1
+    filteredSlices.forEach((slice) => {
       allCombinedData.push([soChungTu++, ...slice, storeName])
     })
   })
