@@ -4,92 +4,114 @@
   >
     <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
       <!-- Upload + Template buttons -->
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".xlsx,.xls"
-            multiple
-            @change="handleFileUpload"
-            class="hidden"
-          />
-          <input
-            type="text"
-            :value="fileName"
-            placeholder="Upload File..."
-            disabled
-            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[300px]"
-          />
-          <button
-            @click="$refs.fileInput.click()"
-            :disabled="isLoading"
-            class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-70 sm:w-auto"
-          >
-            <span v-if="isLoading" class="animate-spin">
-              <!-- SVG spinner -->
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle opacity="0.5" cx="10" cy="10" r="8.75" stroke="white" stroke-width="2.5" />
-                <path
-                  d="M18.2372 12.9506C18.8873 13.1835 19.6113 12.846 19.7613 12.1719C20.0138 11.0369 20.0672 9.86319 19.9156 8.70384C19.7099 7.12996 19.1325 5.62766 18.2311 4.32117C17.3297 3.01467 16.1303 1.94151 14.7319 1.19042C13.7019 0.637155 12.5858 0.270357 11.435 0.103491C10.7516 0.00440265 10.179 0.561473 10.1659 1.25187C10.1528 1.94226 10.7059 2.50202 11.3845 2.6295C12.1384 2.77112 12.8686 3.02803 13.5487 3.39333C14.5973 3.95661 15.4968 4.76141 16.1728 5.74121C16.8488 6.721 17.2819 7.84764 17.4361 9.02796C17.5362 9.79345 17.5172 10.5673 17.3819 11.3223C17.2602 12.002 17.5871 12.7178 18.2372 12.9506Z"
-                  stroke="white"
-                  stroke-width="4"
-                />
-              </svg>
-            </span>
-            {{ isLoading ? 'Processing...' : 'Upload File' }}
-          </button>
+      <div class="flex flex-col gap-10 sm:flex-row sm:items-center sm:justify-start">
+        <!-- Dropdown channel -->
+        <div class="flex min-w-[605px]">
+          <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
+            <template #label> Select Channels </template>
+          </MultipleSelect>
         </div>
 
-        <div class="flex gap-2 flex-wrap">
-          <button
-            @click="downloadTemplate"
-            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            Download sample file
-          </button>
+        <div class="flex flex-row justify-between w-full">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Select Input File(s)
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  multiple
+                  @change="handleFileUpload"
+                  class="hidden"
+                />
+                <input
+                  type="text"
+                  :value="fileName"
+                  placeholder="Upload File..."
+                  disabled
+                  class="dark:bg-dark-900 h-11 w-full min-w-[400px] rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
+                />
+                <button
+                  @click="$refs.fileInput.click()"
+                  :disabled="isLoading"
+                  class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
+                >
+                  {{ isLoading ? 'Processing...' : 'Upload File' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            <button
+              @click="downloadTemplate"
+              class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+            >
+              Download sample file
+            </button>
+          </div>
         </div>
       </div>
+      <div class="flex flex-row gap-10">
+        <!-- Date pickers cho từng channel -->
+        <div class="flex flex-col gap-4 items-between min-w-[605px]">
+          <div v-for="channel in selectedChannels" :key="channel" class="flex items-center gap-2">
+            <label class="w-24 mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              {{ channel }}
+            </label>
 
-      <div
-        class="rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10"
-      >
-        <div class="w-full max-w-[830px] flex flex-col gap-4">
-          <h3 class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl">
-            Hướng dẫn chuyển đổi thành file Excel 97 - 2003 Workbook
-          </h3>
-
-          <ol
-            class="list-decimal list-inside text-sm text-gray-500 dark:text-gray-400 sm:text-base flex flex-col gap-2"
-          >
-            <li>Tải và giải nén folder kết quả.</li>
-            <li>
-              Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
-              <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
-              Download bên dưới và đặt chúng cùng với folder kết quả.
-            </li>
-            <li>Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.</li>
-            <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
-          </ol>
-
-          <div class="mb-5 overflow-hidden rounded-lg">
-            <img src="/demo-convert-to-xls.png" alt="card" class="overflow-hidden rounded-lg" />
+            <!-- 🗓 Cho phép chọn nhiều ngày -->
+            <flat-pickr
+              v-model="channelDateRanges[channel]"
+              :config="multiDateConfig"
+              class="h-10 min-w-[500px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              placeholder="Select multiple dates"
+            />
           </div>
         </div>
 
-        <!-- New: Download conversion tool -->
-        <button
-          @click="downloadConversionTool"
-          class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+        <!-- Phần hướng dẫn hoặc xử lý dữ liệu hiện có -->
+        <div
+          class="bg-white dark:border-gray-800 dark:bg-white/[0.03]"
         >
-          Download tool convert Excel 97-2003
-        </button>
+          <div class="w-full max-w-[830px] flex flex-col gap-4">
+            <h3
+              class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl"
+            >
+              Hướng dẫn chuyển đổi thành file Excel 97 - 2003 Workbook
+            </h3>
+
+            <ol
+              class="list-decimal list-inside text-sm text-gray-500 dark:text-gray-400 sm:text-base flex flex-col gap-2"
+            >
+              <li>Tải và giải nén folder kết quả.</li>
+              <li>
+                Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
+                <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
+                Download bên dưới và đặt chúng cùng với folder kết quả.
+              </li>
+              <li>
+                Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.
+              </li>
+              <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
+            </ol>
+
+            <div class="mb-5 overflow-hidden rounded-lg">
+              <img src="/demo-convert-to-xls.png" alt="card" class="overflow-hidden rounded-lg" />
+            </div>
+          </div>
+
+          <!-- New: Download conversion tool -->
+          <button
+            @click="downloadConversionTool"
+            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+          >
+            Download tool convert Excel 97-2003
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -100,10 +122,38 @@ import { ref } from 'vue'
 import * as XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
+import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
 
+/* ---------------------- FLATPICKR CONFIG ---------------------- */
+const multiDateConfig = {
+  mode: 'multiple',
+  dateFormat: 'd/m/Y',
+  altInput: true,
+  altFormat: 'd/m/Y',
+  allowInput: true,
+  conjunction: ', ',
+}
+/* ---------------------- STATE ---------------------- */
 const fileName = ref('')
-const fileInput = ref(null)
 const isLoading = ref(false)
+const fileInput = ref(null)
+
+const channels = [
+  { label: 'Bank', value: 'Bank' },
+  { label: 'Momo', value: 'Momo' },
+  { label: 'ZaloPay', value: 'ZaloPay' },
+  { label: 'VNPay', value: 'VNPay' },
+]
+
+const selectedChannels = ref([])
+const channelDateRanges = ref(
+  channels.reduce((acc, ch) => {
+    acc[ch.value] = []
+    return acc
+  }, {}),
+)
 
 // --- Constants ---
 const HEADERS = [
@@ -153,7 +203,9 @@ const YELLOW_HEADERS = [
   'MucCpNo',
   'ThamChieu',
 ]
-const HIDDEN_COLS = [3, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23, 24, 25, 26, 27, 28, 30]
+const HIDDEN_COLS = [
+  3, 6, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 22, 23, 24, 25, 26, 27, 28, 30,
+]
 const DATE_COLS_FIXED = [1, 29] // B & AD
 const TEXT_COL = 21
 const MONEY_COL = 6
@@ -296,7 +348,7 @@ async function downloadTemplate() {
 }
 
 async function handleFileUpload(e) {
-  isLoading.value = true;
+  isLoading.value = true
   let files = Array.from(e.target.files || [])
   if (files.length === 0) return
 
@@ -374,12 +426,33 @@ async function handleFileUpload(e) {
   // Xuất file Excel cho từng quán
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
-    const sheetData = [['SoChungTu', ...HEADERS]]
+
+    // 👉 Lọc theo selectedChannels
+    const filteredSlices = slices.filter((slice) => {
+      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
+
+      // Nếu chọn tất cả channel → chỉ lọc theo ngày nếu có set
+      if (selectedChannels.value.length === channels.length) {
+        return selectedChannels.value.some((ch) => isRowInChannelDateRange(slice, ch))
+      }
+
+      // Chỉ lấy dòng có chứa ít nhất 1 kênh được chọn và nằm trong khoảng ngày tương ứng
+      return selectedChannels.value.some(
+        (ch) => lastValue.includes(ch.toLowerCase()) && isRowInChannelDateRange(slice, ch),
+      )
+    })
+
+    const finalHeaders = [...HEADERS]
+    finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi')
+    const sheetData = [['SoChungTu', ...finalHeaders]]
 
     let soChungTu = lastSoChungTu
-    slices.forEach((slice) => {
+    filteredSlices.forEach((slice) => {
       soChungTu++
-      sheetData.push([soChungTu, ...slice])
+      const newSlice = [...slice]
+      // 👉 chèn dữ liệu rỗng tương ứng cho cột Donvi
+      newSlice.splice(newSlice.length - 1, 0, '')
+      sheetData.push([soChungTu, ...newSlice])
     })
 
     data.finalSoChungTu = soChungTu
@@ -395,6 +468,34 @@ async function handleFileUpload(e) {
       XLSX.write(newWb, { type: 'array', bookType: 'xlsx' }),
     )
   })
+
+  // 👉 Thêm file tổng hợp
+  const allCombinedData = [['SoChungTu', ...HEADERS, 'TenQuan']]
+
+  Object.entries(allStoresData).forEach(([storeName, data]) => {
+    const { slices, lastSoChungTu } = data
+
+    const filteredSlices = slices.filter((slice) => {
+      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
+      if (selectedChannels.value.length === channels.length) return true
+      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
+    })
+
+    let soChungTu = lastSoChungTu - filteredSlices.length + 1
+    filteredSlices.forEach((slice) => {
+      allCombinedData.push([soChungTu++, ...slice, storeName])
+    })
+  })
+
+  // Tạo sheet và format tương tự
+  const wsTotal = XLSX.utils.aoa_to_sheet(allCombinedData)
+  applyStyles(wsTotal, allCombinedData)
+
+  const wbTotal = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wbTotal, wsTotal, 'TongHop')
+
+  // Ghi vào file ZIP
+  zip.file(`TongHop.xlsx`, XLSX.write(wbTotal, { type: 'array', bookType: 'xlsx' }))
 
   // 👉 Sinh thêm file input đã cập nhật (cột 3 = SoChungTu cuối)
   for (const file of files) {
@@ -466,7 +567,7 @@ async function handleFileUpload(e) {
 
   const content = await zip.generateAsync({ type: 'blob' })
   saveAs(content, zipName)
-  isLoading.value = false;
+  isLoading.value = false
 }
 
 // --- New: Download conversion tool ---
@@ -494,5 +595,51 @@ async function downloadConversionTool() {
   } catch (err) {
     alert('❌ Lỗi tải công cụ: ' + err.message)
   }
+}
+
+function isRowInChannelDateRange(row, channel) {
+  const dateStr = excelDateToString(row[28]) // "dd/mm/yyyy"
+  if (!dateStr) return false
+
+  const [dd, mm, yyyy] = dateStr.split('/').map(Number)
+  const rowTime = Date.UTC(yyyy, mm - 1, dd)
+
+  let selectedDates = channelDateRanges.value[channel]
+
+  // ✅ Normalize thành mảng đúng định dạng
+  if (!Array.isArray(selectedDates)) {
+    if (typeof selectedDates === 'string') {
+      // Nếu là "08/10/2025, 11/10/2025" thì tách thành ['08/10/2025', '11/10/2025']
+      selectedDates = selectedDates
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.includes('/'))
+    } else {
+      selectedDates = []
+    }
+  }
+
+  if (selectedDates.length === 0) return true
+
+  console.log('🗓 [Compare Dates]')
+  console.log(`→ Channel: ${channel}`)
+  console.log(`→ Row date (Excel): ${dateStr} (UTC=${new Date(rowTime).toISOString()})`)
+  console.log('→ Selected dates:', selectedDates)
+
+  const result = selectedDates.some((sel) => {
+    console.log(`   ├─ sel: ${sel}`)
+    const [d, m, y] = sel.split('/').map(Number)
+    const selTime = Date.UTC(y, m - 1, d)
+    const match = selTime === rowTime
+    console.log(`   │   selTime: ${selTime} (${new Date(selTime).toISOString()})`)
+    console.log(`   │   rowTime: ${rowTime} (${new Date(rowTime).toISOString()})`)
+    console.log(`   └─ Compare with selected: ${sel} → ${match ? '✅ MATCH' : '❌ not match'}`)
+    return match
+  })
+
+  console.log(`→ Final match result for channel "${channel}": ${result ? '✅ true' : '❌ false'}`)
+  console.log('---------------------------------------------')
+
+  return result
 }
 </script>
