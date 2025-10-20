@@ -1,9 +1,9 @@
 export function useString() {
-  function toKebabCase(input: string): string {
+  function toKebabCase(input) {
     if (typeof input !== 'string') return ''
 
     // Bỏ dấu tiếng Việt
-    const vietnameseMap: Record<string, string> = {
+    const vietnameseMap = {
       a: 'áàảãạâấầẩẫậăắằẳẵặ',
       e: 'éèẻẽẹêếềểễệ',
       i: 'íìỉĩị',
@@ -36,7 +36,7 @@ export function useString() {
   }
 }
 
-export function removeVietnameseTones(str: string) {
+export function removeVietnameseTones(str) {
   return str
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -52,7 +52,7 @@ export function removeDiacritics(str) {
     .replace(/Đ/g, 'D')
 }
 
-export const removeEmptyStrings = (obj: any): any => {
+export const removeEmptyStrings = (obj) => {
   if (Array.isArray(obj)) {
     return obj.map(removeEmptyStrings)
   }
