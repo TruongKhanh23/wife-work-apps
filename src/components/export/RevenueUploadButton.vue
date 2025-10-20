@@ -4,113 +4,110 @@
   >
     <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
       <!-- Upload + Template buttons -->
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-              Select Branch
-            </label>
-            <div class="flex items-center gap-2">
-              <input
-                ref="fileInput"
-                type="file"
-                accept=".xlsx,.xls"
-                multiple
-                @change="handleFileUpload"
-                class="hidden"
-              />
-              <input
-                type="text"
-                :value="fileName"
-                placeholder="Upload File..."
-                disabled
-                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
-              />
-              <button
-                @click="$refs.fileInput.click()"
-                :disabled="isLoading"
-                class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
-              >
-                {{ isLoading ? 'Processing...' : 'Upload File' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
+      <div class="flex flex-col gap-10 sm:flex-row sm:items-center sm:justify-start">
         <!-- Dropdown channel -->
-        <div class="flex min-w-[600px]">
+        <div class="flex min-w-[605px]">
           <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
             <template #label> Select Channels </template>
           </MultipleSelect>
         </div>
-
-        <!-- Date range cho từng channel -->
-        <div class="flex flex-col gap-2">
-          <div v-for="channel in selectedChannels" :key="channel" class="flex items-center gap-2">
-            <span class="w-24">{{ channel }}</span>
-
-            <!-- 🗓 Flatpickr thay cho input date -->
-            <flat-pickr
-              v-model="channelDateRanges[channel].start"
-              :config="flatpickrConfig"
-              class="h-10 w-[130px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
-              placeholder="Start"
-            />
-
-            <span>to</span>
-
-            <flat-pickr
-              v-model="channelDateRanges[channel].end"
-              :config="flatpickrConfig"
-              class="h-10 w-[130px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
-              placeholder="End"
-            />
+        <div class="flex flex-row justify-between w-full">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                Select Input File(s)
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  multiple
+                  @change="handleFileUpload"
+                  class="hidden"
+                />
+                <input
+                  type="text"
+                  :value="fileName"
+                  placeholder="Upload File..."
+                  disabled
+                  class="dark:bg-dark-900 h-11 w-full min-w-[400px] rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
+                />
+                <button
+                  @click="$refs.fileInput.click()"
+                  :disabled="isLoading"
+                  class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
+                >
+                  {{ isLoading ? 'Processing...' : 'Upload File' }}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="flex gap-2 flex-wrap">
-          <button
-            @click="downloadTemplate"
-            class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-          >
-            Download sample file
-          </button>
+          <div class="flex gap-2 flex-wrap">
+            <button
+              @click="downloadTemplate"
+              class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+            >
+              Download sample file
+            </button>
+          </div>
         </div>
       </div>
 
-      <div
-        class="rounded-2xl border border-gray-200 bg-white px-5 py-7 dark:border-gray-800 dark:bg-white/[0.03] xl:px-10"
-      >
-        <div class="w-full max-w-[830px] flex flex-col gap-4">
-          <h3 class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl">
-            Hướng dẫn chuyển đổi thành file Excel 97 - 2003 Workbook
-          </h3>
+      <div class="flex flex-row gap-10">
+        <!-- Date picker cho từng channel -->
+        <div class="flex flex-col gap-4 items-between min-w-[605px]">
+          <div v-for="channel in selectedChannels" :key="channel" class="flex items-center gap-2">
+            <label class="w-24 mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+              {{ channel }}
+            </label>
 
-          <ol
-            class="list-decimal list-inside text-sm text-gray-500 dark:text-gray-400 sm:text-base flex flex-col gap-2"
-          >
-            <li>Tải và giải nén folder kết quả.</li>
-            <li>
-              Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
-              <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
-              Download bên dưới và đặt chúng cùng với folder kết quả.
-            </li>
-            <li>Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.</li>
-            <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
-          </ol>
-
-          <div class="mb-5 overflow-hidden rounded-lg">
-            <img src="/demo-convert-to-xls.png" alt="card" class="overflow-hidden rounded-lg" />
+            <!-- 🗓 Cho phép chọn nhiều ngày -->
+            <flat-pickr
+              v-model="channelDateRanges[channel]"
+              :config="multiDateConfig"
+              class="h-10 min-w-[500px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              placeholder="Select multiple dates"
+            />
           </div>
         </div>
+        <div class="bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+          <div class="w-full max-w-[830px] flex flex-col gap-4">
+            <h3
+              class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl"
+            >
+              Hướng dẫn chuyển đổi thành file Excel 97 - 2003 Workbook
+            </h3>
 
-        <!-- New: Download conversion tool -->
-        <button
-          @click="downloadConversionTool"
-          class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
-        >
-          Download tool convert Excel 97-2003
-        </button>
+            <ol
+              class="list-decimal list-inside text-sm text-gray-500 dark:text-gray-400 sm:text-base flex flex-col gap-2"
+            >
+              <li>Tải và giải nén folder kết quả.</li>
+              <li>
+                Tải và giải nén các file logic <code class="font-bold">convert_to_xls.bat</code> và
+                <code class="font-bold">do_not_touch_convert_excel.ps1</code> bằng cách nhấn vào nút
+                Download bên dưới và đặt chúng cùng với folder kết quả.
+              </li>
+              <li>
+                Nhấp đúp chuột để chạy file <code class="font-bold">convert_to_xls.bat</code>.
+              </li>
+              <li>Kiểm tra kết quả trong folder "<code>dd-mm-yyyy-Converted</code>".</li>
+            </ol>
+
+            <div class="mb-5 overflow-hidden rounded-lg">
+              <img src="/demo-convert-to-xls.png" alt="card" class="overflow-hidden rounded-lg" />
+            </div>
+          </div>
+
+          <!-- New: Download conversion tool -->
+          <button
+            @click="downloadConversionTool"
+            class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+          >
+            Download tool convert Excel 97-2003
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -126,11 +123,13 @@ import { saveAs } from 'file-saver'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
 
 /* ---------------------- FLATPICKR CONFIG ---------------------- */
-const flatpickrConfig = {
-  dateFormat: 'd/m/Y',   // giá trị thực tế (v-model)
-  altInput: true,        // hiển thị input thân thiện
-  altFormat: 'd/m/Y',    // định dạng UI
+const multiDateConfig = {
+  mode: 'multiple',
+  dateFormat: 'd/m/Y',
+  altInput: true,
+  altFormat: 'd/m/Y',
   allowInput: true,
+  conjunction: ', ', // hiển thị các ngày cách nhau bằng dấu phẩy
 }
 
 /* ---------------------- STATE ---------------------- */
@@ -153,9 +152,9 @@ const channels = [
 const selectedChannels = ref([])
 const channelDateRanges = ref(
   channels.reduce((acc, ch) => {
-    acc[ch.value] = { start: '', end: '' }
+    acc[ch.value] = []
     return acc
-  }, {})
+  }, {}),
 )
 
 // --- Constants ---
@@ -605,42 +604,47 @@ function isRowInChannelDateRange(row, channel) {
   const dateStr = excelDateToString(row[28]) // "dd/mm/yyyy"
   if (!dateStr) return false
 
-  // convert rowDate -> Date object
   const [dd, mm, yyyy] = dateStr.split('/').map(Number)
-  const rowDate = new Date(yyyy, mm - 1, dd)
+  const rowTime = Date.UTC(yyyy, mm - 1, dd)
 
-  const range = channelDateRanges.value[channel]
-  if (!range.start || !range.end) return true
+  let selectedDates = channelDateRanges.value[channel]
 
-  // Nếu startDate và endDate là string (vd: '11/10/2025'), convert về Date
-  const start =
-    typeof range.start === 'string'
-      ? (() => {
-          const [d, m, y] = range.start.split('/').map(Number)
-          return new Date(y, m - 1, d)
-        })()
-      : range.start
+  // ✅ Normalize thành mảng đúng định dạng
+  if (!Array.isArray(selectedDates)) {
+    if (typeof selectedDates === 'string') {
+      // Nếu là "08/10/2025, 11/10/2025" thì tách thành ['08/10/2025', '11/10/2025']
+      selectedDates = selectedDates
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.includes('/'))
+    } else {
+      selectedDates = []
+    }
+  }
 
-  const end =
-    typeof range.end === 'string'
-      ? (() => {
-          const [d, m, y] = range.end.split('/').map(Number)
-          return new Date(y, m - 1, d)
-        })()
-      : range.end
+  if (selectedDates.length === 0) return true
 
-  // So sánh theo mốc 00:00 để tránh lệch timezone
-  const rowTime = new Date(rowDate.setHours(0, 0, 0, 0)).getTime()
-  const startTime = new Date(start.setHours(0, 0, 0, 0)).getTime()
-  const endTime = new Date(end.setHours(0, 0, 0, 0)).getTime()
+  console.log('🗓 [Compare Dates]')
+  console.log(`→ Channel: ${channel}`)
+  console.log(`→ Row date (Excel): ${dateStr} (UTC=${new Date(rowTime).toISOString()})`)
+  console.log('→ Selected dates:', selectedDates)
 
-  console.log('rowDate', rowDate)
-  console.log('startDate', start)
-  console.log('endDate', end)
-  console.log('rowDate >= startDate', rowTime >= startTime)
-  console.log('rowDate <= endDate', rowTime <= endTime)
+  const result = selectedDates.some((sel) => {
+    console.log(`   ├─ sel: ${sel}`)
+    const [d, m, y] = sel.split('/').map(Number)
+    const selTime = Date.UTC(y, m - 1, d)
+    const match = selTime === rowTime
+    console.log(`   │   selTime: ${selTime} (${new Date(selTime).toISOString()})`)
+    console.log(`   │   rowTime: ${rowTime} (${new Date(rowTime).toISOString()})`)
+    console.log(`   └─ Compare with selected: ${sel} → ${match ? '✅ MATCH' : '❌ not match'}`)
+    return match
+  })
 
-  return rowTime >= startTime && rowTime <= endTime
+  console.log(`→ Final match result for channel "${channel}": ${result ? '✅ true' : '❌ false'}`)
+  console.log('---------------------------------------------')
+
+  return result
 }
+
 
 </script>
