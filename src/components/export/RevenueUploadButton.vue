@@ -155,7 +155,6 @@ const HEADERS = [
   'DonViNhan',
   'ThamChieu',
   'NhanVien',
-  'Donvi',
   '',
 ]
 
@@ -406,12 +405,17 @@ async function handleFileUpload(e) {
       return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
     })
 
-    const sheetData = [['SoChungTu', ...HEADERS]]
+    const finalHeaders = [...HEADERS]
+    finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi')
+    const sheetData = [['SoChungTu', ...finalHeaders]]
 
     let soChungTu = lastSoChungTu
     filteredSlices.forEach((slice) => {
       soChungTu++
-      sheetData.push([soChungTu, ...slice])
+      const newSlice = [...slice]
+      // 👉 chèn dữ liệu rỗng tương ứng cho cột Donvi
+      newSlice.splice(newSlice.length - 1, 0, '')
+      sheetData.push([soChungTu, ...newSlice])
     })
 
     data.finalSoChungTu = soChungTu
