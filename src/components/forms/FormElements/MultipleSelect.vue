@@ -102,7 +102,7 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue';
-import { removeDiacritics } from '@/composables/useString.ts';
+import { removeDiacritics } from '@/composables/useString.js';
 import CheckboxIcon from '@/icons/CheckboxIcon.vue';
 import { ChevronDownIcon } from '@/icons';
 
