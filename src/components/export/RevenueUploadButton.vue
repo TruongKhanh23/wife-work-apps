@@ -31,18 +31,41 @@
                 :disabled="isLoading"
                 class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
               >
-                <span v-if="isLoading" class="animate-spin">
-                  <!-- SVG spinner -->
-                </span>
                 {{ isLoading ? 'Processing...' : 'Upload File' }}
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Dropdown channel -->
         <div class="flex min-w-[600px]">
           <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
             <template #label> Select Channels </template>
           </MultipleSelect>
+        </div>
+
+        <!-- Date range cho từng channel -->
+        <div class="flex flex-col gap-2">
+          <div v-for="channel in selectedChannels" :key="channel" class="flex items-center gap-2">
+            <span class="w-24">{{ channel }}</span>
+
+            <!-- 🗓 Flatpickr thay cho input date -->
+            <flat-pickr
+              v-model="channelDateRanges[channel].start"
+              :config="flatpickrConfig"
+              class="h-10 w-[130px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              placeholder="Start"
+            />
+
+            <span>to</span>
+
+            <flat-pickr
+              v-model="channelDateRanges[channel].end"
+              :config="flatpickrConfig"
+              class="h-10 w-[130px] border border-gray-300 rounded px-2 py-1 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-white/90"
+              placeholder="End"
+            />
+          </div>
         </div>
 
         <div class="flex gap-2 flex-wrap">
@@ -95,21 +118,27 @@
 
 <script setup>
 import { ref } from 'vue'
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
 import * as XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
 
+/* ---------------------- FLATPICKR CONFIG ---------------------- */
+const flatpickrConfig = {
+  dateFormat: 'd/m/Y',   // giá trị thực tế (v-model)
+  altInput: true,        // hiển thị input thân thiện
+  altFormat: 'd/m/Y',    // định dạng UI
+  allowInput: true,
+}
+
+/* ---------------------- STATE ---------------------- */
 const fileName = ref('')
-const fileInput = ref(null)
 const isLoading = ref(false)
 
-// --- Filter Options ---
 const channels = [
-  {
-    label: 'Tiền mặt',
-    value: 'Tiền mặt',
-  },
+  { label: 'Tiền mặt', value: 'Tiền mặt' },
   { label: 'Momo', value: 'Momo' },
   { label: 'GrabFood', value: 'GrabFood' },
   { label: 'BeFood', value: 'BeFood' },
@@ -122,6 +151,12 @@ const channels = [
 ]
 
 const selectedChannels = ref([])
+const channelDateRanges = ref(
+  channels.reduce((acc, ch) => {
+    acc[ch.value] = { start: '', end: '' }
+    return acc
+  }, {})
+)
 
 // --- Constants ---
 const HEADERS = [
@@ -399,10 +434,16 @@ async function handleFileUpload(e) {
     // 👉 Lọc theo selectedChannels
     const filteredSlices = slices.filter((slice) => {
       const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
-      // Nếu người dùng chọn tất cả, không lọc gì cả
-      if (selectedChannels.value.length === channels.length) return true
-      // Chỉ lấy dòng có chứa ít nhất một từ trong danh sách chọn
-      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
+
+      // Nếu chọn tất cả channel → chỉ lọc theo ngày nếu có set
+      if (selectedChannels.value.length === channels.length) {
+        return selectedChannels.value.some((ch) => isRowInChannelDateRange(slice, ch))
+      }
+
+      // Chỉ lấy dòng có chứa ít nhất 1 kênh được chọn và nằm trong khoảng ngày tương ứng
+      return selectedChannels.value.some(
+        (ch) => lastValue.includes(ch.toLowerCase()) && isRowInChannelDateRange(slice, ch),
+      )
     })
 
     const finalHeaders = [...HEADERS]
@@ -559,4 +600,47 @@ async function downloadConversionTool() {
     alert('❌ Lỗi tải công cụ: ' + err.message)
   }
 }
+
+function isRowInChannelDateRange(row, channel) {
+  const dateStr = excelDateToString(row[28]) // "dd/mm/yyyy"
+  if (!dateStr) return false
+
+  // convert rowDate -> Date object
+  const [dd, mm, yyyy] = dateStr.split('/').map(Number)
+  const rowDate = new Date(yyyy, mm - 1, dd)
+
+  const range = channelDateRanges.value[channel]
+  if (!range.start || !range.end) return true
+
+  // Nếu startDate và endDate là string (vd: '11/10/2025'), convert về Date
+  const start =
+    typeof range.start === 'string'
+      ? (() => {
+          const [d, m, y] = range.start.split('/').map(Number)
+          return new Date(y, m - 1, d)
+        })()
+      : range.start
+
+  const end =
+    typeof range.end === 'string'
+      ? (() => {
+          const [d, m, y] = range.end.split('/').map(Number)
+          return new Date(y, m - 1, d)
+        })()
+      : range.end
+
+  // So sánh theo mốc 00:00 để tránh lệch timezone
+  const rowTime = new Date(rowDate.setHours(0, 0, 0, 0)).getTime()
+  const startTime = new Date(start.setHours(0, 0, 0, 0)).getTime()
+  const endTime = new Date(end.setHours(0, 0, 0, 0)).getTime()
+
+  console.log('rowDate', rowDate)
+  console.log('startDate', start)
+  console.log('endDate', end)
+  console.log('rowDate >= startDate', rowTime >= startTime)
+  console.log('rowDate <= endDate', rowTime <= endTime)
+
+  return rowTime >= startTime && rowTime <= endTime
+}
+
 </script>
