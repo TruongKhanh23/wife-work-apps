@@ -121,6 +121,7 @@ import * as XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
+import branchMapping from '@/assets/branchMapping.js'
 
 /* ---------------------- FLATPICKR CONFIG ---------------------- */
 const multiDateConfig = {
@@ -251,6 +252,22 @@ function createSheetDataSlice(slice, dateColumnIndexes) {
     }
   })
   return slice
+}
+
+function normalizeText(str) {
+  return (str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .trim()
+    .toLowerCase()
+}
+
+function findBranchUnitByMomoName(tenQuan) {
+  const normalized = normalizeText(tenQuan)
+  const found = branchMapping.find((b) => normalizeText(b.branchNameMomo) === normalized)
+  return found ? found.branchUnit : ''
 }
 
 function applyStyles(ws, sheetData) {
@@ -453,8 +470,8 @@ async function handleFileUpload(e) {
     filteredSlices.forEach((slice) => {
       soChungTu++
       const newSlice = [...slice]
-      // 👉 chèn dữ liệu rỗng tương ứng cho cột Donvi
-      newSlice.splice(newSlice.length - 1, 0, '')
+      const branchUnit = findBranchUnitByMomoName(storeName)
+      newSlice.splice(newSlice.length - 1, 0, branchUnit)
       sheetData.push([soChungTu, ...newSlice])
     })
 
@@ -489,7 +506,8 @@ async function handleFileUpload(e) {
     let soChungTu = lastSoChungTu - filteredSlices.length + 1
     filteredSlices.forEach((slice) => {
       const newSlice = [...slice]
-      newSlice.splice(newSlice.length - 1, 0, '') // thêm Donvi
+      const branchUnit = findBranchUnitByMomoName(storeName)
+      newSlice.splice(newSlice.length - 1, 0, branchUnit)
       allCombinedData.push([soChungTu++, ...newSlice, storeName])
     })
   })
