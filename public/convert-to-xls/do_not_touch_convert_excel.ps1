@@ -42,6 +42,8 @@ Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
     $sheet.Columns.Item(8).NumberFormat = '_(* #.##0_);_(* (#.##0);_(* "-"??_);_(@_)'
     $sheet.Columns.Item(22).NumberFormat = "@"
     $sheet.Columns.Item(30).NumberFormat = "@"   # đặt kiểu Text
+    $sheet.Columns.Item(32).NumberFormat = "@"   # đặt kiểu Text
+
     $lastRow = $sheet.UsedRange.Rows.Count
     $range = $sheet.Range("AD2:AD$lastRow")      # cột 30 = AD
 
@@ -56,6 +58,10 @@ Get-ChildItem -Path $src -Filter *.xlsx | ForEach-Object {
     $usedRange = $sheet.UsedRange
     $lastRow = $usedRange.Rows.Count
     $sheet.Range("G2:G$lastRow").Value2 = 0   # từ dòng 2 đến hết (giữ header dòng 1)
+
+    # ✅ Ép kiểu lại dòng đầu tiên sau khi xử lý xong toàn bộ
+    $headerRow = $sheet.Rows.Item(1)
+    $headerRow.NumberFormat = "General"
 
     # Lưu sang xls
     $newName = Join-Path $dst ($_.BaseName + ".xls")
