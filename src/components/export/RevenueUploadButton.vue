@@ -472,8 +472,10 @@ async function handleFileUpload(e) {
     )
   })
 
-  // 👉 Thêm file tổng hợp
-  const allCombinedData = [['SoChungTu', ...HEADERS, 'TenQuan']]
+  // 👉 Thêm file tổng hợp (có cả cột Donvi)
+  const finalHeaders = [...HEADERS]
+  finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi') // thêm Donvi trước cột cuối
+  const allCombinedData = [['SoChungTu', ...finalHeaders, 'TenQuan']]
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
@@ -486,11 +488,12 @@ async function handleFileUpload(e) {
 
     let soChungTu = lastSoChungTu - filteredSlices.length + 1
     filteredSlices.forEach((slice) => {
-      allCombinedData.push([soChungTu++, ...slice, storeName])
+      const newSlice = [...slice]
+      newSlice.splice(newSlice.length - 1, 0, '') // thêm Donvi
+      allCombinedData.push([soChungTu++, ...newSlice, storeName])
     })
   })
 
-  // Tạo sheet và format tương tự
   const wsTotal = XLSX.utils.aoa_to_sheet(allCombinedData)
   applyStyles(wsTotal, allCombinedData)
 
@@ -645,6 +648,4 @@ function isRowInChannelDateRange(row, channel) {
 
   return result
 }
-
-
 </script>
