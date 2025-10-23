@@ -61,7 +61,7 @@ const branchMapping = [
     inventoryCode: 'CH.1414TL8',
     branchUnitName: 'CL-HCM-1414 Tỉnh Lộ 8, Củ Chi',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG -1414 TỈNH LỘ 8 CỦ CHI',
-    branchNameMomo: 'TỈNH LỘ 8CỦ CHI',
+    branchNameMomo: '1414TỈNH LỘ 8CỦ CHI',
   },
   {
     branchUnit: '33',
@@ -69,7 +69,7 @@ const branchMapping = [
     inventoryCode: 'CH.1568HTP',
     branchUnitName: 'CL-HCM-1568 Huỳnh Tấn Phát',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HUỲNH TẤN PHÁT',
-    branchNameMomo: 'HUỲNH TẤN PHÁT NHÀ BÈ',
+    branchNameMomo: '1568HUỲNH TẤN PHÁT NHÀ BÈ',
   },
   {
     branchUnit: '43',
@@ -77,7 +77,7 @@ const branchMapping = [
     inventoryCode: 'CH.87.2LTHG',
     branchUnitName: 'CL-MTH-87/2 Lê Thị Hồng Gấm',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - TIỀN GIANG',
-    branchNameMomo: 'TIỀN GIANG',
+    branchNameMomo: '87TIỀN GIANG',
   },
   {
     branchUnit: '14',
@@ -117,7 +117,7 @@ const branchMapping = [
     inventoryCode: 'CH.6BCTQT',
     branchUnitName: 'CL-HCM-6B Công Trường Quốc Tế',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HỒ CON RÙA',
-    branchNameMomo: 'HỒ CON RÙA',
+    branchNameMomo: '6BHỒ CON RÙA',
   },
   {
     branchUnit: '09',
@@ -173,7 +173,7 @@ const branchMapping = [
     inventoryCode: 'CH.143LBH',
     branchUnitName: 'CL-HCM-143 Liêu Bình Hưng',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - CỦ CHI',
-    branchNameMomo: 'CỦ CHI',
+    branchNameMomo: '143CỦ CHI',
   },
   {
     branchUnit: '28',
@@ -181,7 +181,7 @@ const branchMapping = [
     inventoryCode: 'CH.307DNC',
     branchUnitName: 'CL-HCM-307 Đặng Nguyên Cẩn',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - ĐẶNG NGUYÊN CẨN',
-    branchNameMomo: 'ĐẶNG NGUYÊN CẨN',
+    branchNameMomo: '307ĐẶNG NGUYÊN CẨN',
   },
   {
     branchUnit: '39',
@@ -237,7 +237,7 @@ const branchMapping = [
     inventoryCode: 'CH.71HG',
     branchUnitName: 'CL-HCM-71 Hậu Giang',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 71 HẬU GIANG',
-    branchNameMomo: '71 HẬU GIANG',
+    branchNameMomo: '67-71 HẬU GIANG',
   },
   {
     branchUnit: '02',
@@ -245,7 +245,7 @@ const branchMapping = [
     inventoryCode: 'CH.67HG',
     branchUnitName: 'CL-HCM-67 Hậu Giang',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HẬU GIANG',
-    branchNameMomo: '67 HẬU GIANG',
+    branchNameMomo: '67-71 HẬU GIANG',
   },
   {
     branchUnit: '54',
@@ -253,7 +253,7 @@ const branchMapping = [
     inventoryCode: 'CH.LVL',
     branchUnitName: 'CL-HCM-404 Lê Văn Lương',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG',
-    branchNameMomo: 'QUẬN 7',
+    branchNameMomo: '404QUẬN 7',
   },
   {
     branchUnit: '50',
@@ -261,7 +261,7 @@ const branchMapping = [
     inventoryCode: 'CH.1.97CHL2',
     branchUnitName: 'CL-BD-1/97C Hoà Lân 2',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HÒA LÂN BÌNH DƯƠNG',
-    branchNameMomo: 'THUẬN AN',
+    branchNameMomo: '197THUẬN AN',
   },
   {
     branchUnit: '48',
@@ -269,7 +269,7 @@ const branchMapping = [
     inventoryCode: 'CH.446THD',
     branchUnitName: 'CL-BD-446 Trần Hưng Đạo',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 446 TRẦN HƯNG ĐẠO',
-    branchNameMomo: 'TRẦN HƯNG ĐẠO',
+    branchNameMomo: '446TRẦN HƯNG ĐẠO',
   },
   {
     branchUnit: '49',
@@ -277,7 +277,7 @@ const branchMapping = [
     inventoryCode: 'CH.462NAN',
     branchUnitName: 'CL-BD-462 Nguyễn An Ninh',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 421 NGUYỄN AN NINH',
-    branchNameMomo: 'NGUYỄN AN NINH',
+    branchNameMomo: '462NGUYỄN AN NINH',
   },
   {
     branchUnit: '47',
@@ -293,7 +293,7 @@ const branchMapping = [
     inventoryCode: 'CH.374DL',
     branchUnitName: 'CL-HN-374 Đường Láng',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - ĐƯỜNG LÁNG 2',
-    branchNameMomo: 'ĐƯỜNG LÁNG',
+    branchNameMomo: '374ĐƯỜNG LÁNG',
   },
   {
     branchUnit: '67',
@@ -301,7 +301,7 @@ const branchMapping = [
     inventoryCode: 'CH.378DL',
     branchUnitName: 'CL-HN-378 Đường Láng',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - ĐƯỜNG LÁNG',
-    branchNameMomo: 'ĐƯỜNG LÁNG',
+    branchNameMomo: '374ĐƯỜNG LÁNG',
   },
   {
     branchUnit: '68',
@@ -309,7 +309,7 @@ const branchMapping = [
     inventoryCode: 'CH.8DC',
     branchUnitName: 'CL-HN-8 Đội Cấn',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - ĐỘI CẤN',
-    branchNameMomo: 'ĐỘI CẤN',
+    branchNameMomo: '8ĐỘI CẤN',
   },
   {
     branchUnit: '63',
@@ -317,7 +317,7 @@ const branchMapping = [
     inventoryCode: 'CH.339TN',
     branchUnitName: 'CL-HN-339 Thanh Nhàn',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG HÀ NỘI - 339 THANH NHÀN',
-    branchNameMomo: 'THANH NHÀN',
+    branchNameMomo: '339THANH NHÀN',
   },
   {
     branchUnit: '64',
@@ -325,7 +325,7 @@ const branchMapping = [
     inventoryCode: 'CH.17TDT',
     branchUnitName: 'CL-HN-17 Tôn Đức Thắng',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 17 TÔN ĐỨC THẮNG',
-    branchNameMomo: 'TÔN ĐỨC THẮNG',
+    branchNameMomo: '17TÔN ĐỨC THẮNG',
   },
   {
     branchUnit: '62',
@@ -333,7 +333,7 @@ const branchMapping = [
     inventoryCode: 'CH.330TD',
     branchUnitName: 'CL-HN-330 Trương Định',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 544 TRƯƠNG ĐỊNH',
-    branchNameMomo: 'TRƯƠNG ĐỊNH',
+    branchNameMomo: '330TRƯƠNG ĐỊNH',
   },
   {
     branchUnit: '58',
@@ -341,7 +341,7 @@ const branchMapping = [
     inventoryCode: 'CH.162BT',
     branchUnitName: 'CL-HU-162 Bà Triệu',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 162 BÀ TRIỆU',
-    branchNameMomo: 'BÀ TRIỆU- HUẾ',
+    branchNameMomo: '162BÀ TRIỆU- HUẾ',
   },
   {
     branchUnit: '60',
@@ -349,7 +349,7 @@ const branchMapping = [
     inventoryCode: 'CH.94HV',
     branchUnitName: 'CL-HU-94 Hùng Vương',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 94 HÙNG VƯƠNG',
-    branchNameMomo: 'HÙNG VƯƠNG - HUẾ',
+    branchNameMomo: '94HÙNG VƯƠNG - HUẾ',
   },
   {
     branchUnit: '59',
@@ -357,7 +357,7 @@ const branchMapping = [
     inventoryCode: 'CH.30DTD',
     branchUnitName: 'CL-HU-30 Đoàn Thị Điểm',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 30 ĐOÀN THỊ ĐIỂM',
-    branchNameMomo: 'ĐOÀN THỊ ĐIỂM-HUẾ',
+    branchNameMomo: '30ĐOÀN THỊ ĐIỂM-HUẾ',
   },
   {
     branchUnit: '56',
@@ -365,7 +365,7 @@ const branchMapping = [
     inventoryCode: 'CH.496HD',
     branchUnitName: 'CL-DN-496 Hoàng Diệu',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG ĐÀ NẴNG - 496 HOÀNG DIỆU',
-    branchNameMomo: 'HOÀNG DIỆU',
+    branchNameMomo: '496HOÀNG DIỆU',
   },
   {
     branchUnit: '57',
@@ -373,7 +373,7 @@ const branchMapping = [
     inventoryCode: 'CH.472LD',
     branchUnitName: 'CL-DN-472 Lê Duẩn',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG ĐÀ NẴNG - LÊ DUẨN',
-    branchNameMomo: 'LÊ DUẪN',
+    branchNameMomo: '472LÊ DUẪN',
   },
   {
     branchUnit: '55',
@@ -381,7 +381,7 @@ const branchMapping = [
     inventoryCode: 'CH.241NTT',
     branchUnitName: 'CL-KG-TĐ 241 Nguyễn Trung Trực, Phú Quốc',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - NGUYỄN TRUNG TRỰC KIÊN GIANG',
-    branchNameMomo: 'NGUYỄN TRUNG TRỰC.PHÚ QUỐC',
+    branchNameMomo: '241NGUYỄN TRUNG TRỰC.PHÚ QUỐC',
   },
   {
     branchUnit: '52',
@@ -389,7 +389,7 @@ const branchMapping = [
     inventoryCode: 'CH.174NVC',
     branchUnitName: 'CL-KG-174 Nguyễn Văn Cừ',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - PHÚ QUỐC',
-    branchNameMomo: 'NGUYỄN VĂN CỪ. PHÚ QUỐC',
+    branchNameMomo: '174NGUYỄN VĂN CỪ. PHÚ QUỐC',
   },
   {
     branchUnit: '46',
@@ -397,7 +397,7 @@ const branchMapping = [
     inventoryCode: 'CH.102HHT',
     branchUnitName: 'CL-BR-102 Hoàng Hoa Thám',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - VŨNG TÀU',
-    branchNameMomo: 'HOÀNG HOA THÁM',
+    branchNameMomo: '102HOÀNG HOA THÁM',
   },
   {
     branchUnit: '22',
@@ -405,7 +405,7 @@ const branchMapping = [
     inventoryCode: 'CH.615CMT8',
     branchUnitName: 'CL-BR-615 CMT8',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - BÀ RỊA',
-    branchNameMomo: 'BÀ RỊA',
+    branchNameMomo: '615CMT8BÀ RỊA',
   },
   {
     branchUnit: '53',
@@ -413,7 +413,7 @@ const branchMapping = [
     inventoryCode: 'CH.1ALL',
     branchUnitName: 'CL-TRV-1A Lê Lợi',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - TRÀ VINH',
-    branchNameMomo: 'TRÀ VINH',
+    branchNameMomo: '1ATRÀ VINH',
   },
   {
     branchUnit: '30',
@@ -421,7 +421,7 @@ const branchMapping = [
     inventoryCode: 'CH.29LH',
     branchUnitName: 'CL-TNI-TĐ 29 Long Hoa, Hoà Thành',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HÒA THÀNH TÂY NINH',
-    branchNameMomo: 'TÂY NINH',
+    branchNameMomo: 'TD29TÂY NINH',
   },
   {
     branchUnit: '25',
@@ -429,7 +429,7 @@ const branchMapping = [
     inventoryCode: 'CH.170DBTT',
     branchUnitName: 'CL-CM-170D Bùi Thị Trường',
     branchNameInUnitFile: 'CÀ PHÊ CHÚ LONG - CÀ MAU',
-    branchNameMomo: 'CÀ MAU',
+    branchNameMomo: '170CÀ MAU',
   },
   {
     branchUnit: '23',
@@ -437,7 +437,7 @@ const branchMapping = [
     inventoryCode: 'CH.13CDLDK',
     branchUnitName: 'CL-BTR-13C Đại Lộ Đồng Khởi',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - BẾN TRE',
-    branchNameMomo: 'BẾN TRE',
+    branchNameMomo: '13DAIBẾN TRE',
   },
   {
     branchUnit: '35',
@@ -445,7 +445,7 @@ const branchMapping = [
     inventoryCode: 'CH.446NTT',
     branchUnitName: 'CL-KG-446 Nguyễn Trung Trực, Rạch Giá',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - KIÊN GIANG',
-    branchNameMomo: 'KIÊN GIANG',
+    branchNameMomo: '446KIÊN GIANG',
   },
   {
     branchUnit: '61',
@@ -453,7 +453,7 @@ const branchMapping = [
     inventoryCode: 'CH.49HV',
     branchUnitName: 'CL-QN-49 Hùng Vương',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG QUẢNG NGÃI - 371 QUANG TRUNG',
-    branchNameMomo: 'TP QUẢNG NGÃI',
+    branchNameMomo: '49 QUẢNG NGÃI',
   },
   {
     branchUnit: '29',
@@ -461,7 +461,7 @@ const branchMapping = [
     inventoryCode: 'CH.204HHG',
     branchUnitName: 'CL-DNAI-204 Hà Huy Giáp',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - HÀ HUY GIÁP',
-    branchNameMomo: 'HÀ HUY GIÁP',
+    branchNameMomo: '204HÀ HUY GIÁP',
   },
   {
     branchUnit: '26',
@@ -469,7 +469,7 @@ const branchMapping = [
     inventoryCode: 'CH.108THD',
     branchUnitName: 'CL-CTHO-108 Trần Hưng Đạo',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - CẦN THƠ',
-    branchNameMomo: 'CẦN THƠ',
+    branchNameMomo: '108TRANCẦN THƠ',
   },
   {
     branchUnit: '45',
@@ -477,7 +477,7 @@ const branchMapping = [
     inventoryCode: 'CH.25TNV',
     branchUnitName: 'CL-VL-25 Trưng Nữ Vương',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - VĨNH LONG',
-    branchNameMomo: 'VĨNH LONG',
+    branchNameMomo: '25VĨNH LONG',
   },
   {
     branchUnit: '38',
@@ -485,7 +485,7 @@ const branchMapping = [
     inventoryCode: 'CH.422HHH',
     branchUnitName: 'CL-AG-422 Hà Hoàng Hổ',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - LONG XUYÊN',
-    branchNameMomo: 'LONG XUYÊN',
+    branchNameMomo: '422LONG XUYÊN',
   },
   {
     branchUnit: '41',
@@ -493,7 +493,7 @@ const branchMapping = [
     inventoryCode: 'CH.884PRD',
     branchUnitName: 'CL-BP-884 Phú Riềng Đỏ',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - PHÚ RIỀNG ĐỎ BP',
-    branchNameMomo: 'BÌNH PHƯỚC',
+    branchNameMomo: '884BÌNH PHƯỚC',
   },
   {
     branchUnit: '20',
@@ -501,7 +501,7 @@ const branchMapping = [
     inventoryCode: 'CH.601CMT8',
     branchUnitName: 'CL-TNI-601 CMT8',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 601 CMT8 TÂY NINH',
-    branchNameMomo: 'CMT8 TÂY NINH',
+    branchNameMomo: '601CMT8 TÂY NINH',
   },
   {
     branchUnit: '37',
@@ -509,7 +509,7 @@ const branchMapping = [
     inventoryCode: 'CH.77.7AKVH',
     branchUnitName: 'CL-DNAI-77/7A Khu Văn Hải',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - LONG THÀNH',
-    branchNameMomo: 'LONG THÀNH',
+    branchNameMomo: '77LONG THÀNH',
   },
   {
     branchUnit: '40',
@@ -517,7 +517,7 @@ const branchMapping = [
     inventoryCode: 'CH.32THD',
     branchUnitName: 'CL-BTH-32 Trần Hưng Đạo',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - PHAN THIẾT',
-    branchNameMomo: 'PHAN THIẾT',
+    branchNameMomo: '32PHAN THIẾT',
   },
   {
     branchUnit: '44',
@@ -525,7 +525,7 @@ const branchMapping = [
     inventoryCode: 'CH.2162QL1A',
     branchUnitName: 'CL-DNAI-2162 QL1A Trảng Bom',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - TRẢNG BOM',
-    branchNameMomo: 'TRẢNG BOM',
+    branchNameMomo: '2162TRẢNG BOM',
   },
   {
     branchUnit: '07',
@@ -533,7 +533,7 @@ const branchMapping = [
     inventoryCode: 'CH.88QL62',
     branchUnitName: 'CL-LA-88 QL62 Tân An',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - LONG AN',
-    branchNameMomo: 'LONG AN',
+    branchNameMomo: '88QLLONG AN',
   },
 ]
 
