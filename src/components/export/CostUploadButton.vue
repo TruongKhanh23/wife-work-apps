@@ -125,6 +125,7 @@ import { saveAs } from 'file-saver'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
+import branchMapping from '@/assets/branchMapping.js'
 
 /* ---------------------- FLATPICKR CONFIG ---------------------- */
 const multiDateConfig = {
@@ -209,6 +210,22 @@ const HIDDEN_COLS = [
 const DATE_COLS_FIXED = [1, 29] // B & AD
 const TEXT_COL = 21
 const MONEY_COL = 6
+
+function normalizeText(str) {
+  return (str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .trim()
+    .toLowerCase()
+}
+
+function findBranchUnitByMomoName(tenQuan) {
+  const normalized = normalizeText(tenQuan)
+  const found = branchMapping.find((b) => normalizeText(b.branchNameMomo) === normalized)
+  return found ? found.branchUnit : ''
+}
 
 // --- Helpers ---
 function excelDateToString(val) {
@@ -444,14 +461,15 @@ async function handleFileUpload(e) {
 
     const finalHeaders = [...HEADERS]
     finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi')
+
     const sheetData = [['SoChungTu', ...finalHeaders]]
 
     let soChungTu = lastSoChungTu
     filteredSlices.forEach((slice) => {
       soChungTu++
       const newSlice = [...slice]
-      // 👉 chèn dữ liệu rỗng tương ứng cho cột Donvi
-      newSlice.splice(newSlice.length - 1, 0, '')
+      const branchUnit = findBranchUnitByMomoName(storeName)
+      newSlice.splice(newSlice.length - 1, 0, branchUnit)
       sheetData.push([soChungTu, ...newSlice])
     })
 
@@ -469,21 +487,19 @@ async function handleFileUpload(e) {
     )
   })
 
-  // 👉 Thêm file tổng hợp
-  const allCombinedData = [['SoChungTu', ...HEADERS, 'TenQuan']]
+  const finalHeaders = [...HEADERS]
+  finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi')
+  const allCombinedData = [['SoChungTu', ...finalHeaders, 'TenQuan']]
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
+    let soChungTu = lastSoChungTu - slices.length + 1
 
-    const filteredSlices = slices.filter((slice) => {
-      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
-      if (selectedChannels.value.length === channels.length) return true
-      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
-    })
-
-    let soChungTu = lastSoChungTu - filteredSlices.length + 1
-    filteredSlices.forEach((slice) => {
-      allCombinedData.push([soChungTu++, ...slice, storeName])
+    slices.forEach((slice) => {
+      const newSlice = [...slice]
+      const branchUnit = findBranchUnitByMomoName(storeName)
+      newSlice.splice(newSlice.length - 1, 0, branchUnit)
+      allCombinedData.push([soChungTu++, ...newSlice, storeName])
     })
   })
 
