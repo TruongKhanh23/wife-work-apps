@@ -74,9 +74,7 @@
         </div>
 
         <!-- Phần hướng dẫn hoặc xử lý dữ liệu hiện có -->
-        <div
-          class="bg-white dark:border-gray-800 dark:bg-white/[0.03]"
-        >
+        <div class="bg-white dark:border-gray-800 dark:bg-white/[0.03]">
           <div class="w-full max-w-[830px] flex flex-col gap-4">
             <h3
               class="mb-4 font-semibold text-gray-800 text-theme-xl dark:text-white/90 sm:text-2xl"
@@ -355,10 +353,10 @@ function applyStyles(ws, sheetData) {
 // --- Main ---
 async function downloadTemplate() {
   try {
-    const response = await fetch('/input.xlsx')
+    const response = await fetch('/cost-input.xlsx')
     if (!response.ok) throw new Error('Không tải được file mẫu')
     const blob = await response.blob()
-    saveAs(blob, 'input.xlsx')
+    saveAs(blob, 'cost-input.xlsx')
   } catch (error) {
     alert('❌ Lỗi tải file mẫu: ' + error.message)
   }
@@ -493,9 +491,18 @@ async function handleFileUpload(e) {
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
-    let soChungTu = Math.max(1, (lastSoChungTu || 0) - slices.length + 1)
+    const filteredSlices = slices.filter((slice) => {
+      const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
+      if (selectedChannels.value.length === channels.length) {
+        return selectedChannels.value.some((ch) => isRowInChannelDateRange(slice, ch))
+      }
+      return selectedChannels.value.some(
+        (ch) => lastValue.includes(ch.toLowerCase()) && isRowInChannelDateRange(slice, ch),
+      )
+    })
 
-    slices.forEach((slice) => {
+    let soChungTu = Math.max(1, (lastSoChungTu || 0) - slices.length + 1)
+    filteredSlices.forEach((slice) => {
       const newSlice = [...slice]
       const branchUnit = findBranchUnitByMomoName(storeName)
       newSlice.splice(newSlice.length - 1, 0, branchUnit)

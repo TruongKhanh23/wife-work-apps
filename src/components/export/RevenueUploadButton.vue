@@ -358,10 +358,10 @@ function applyStyles(ws, sheetData) {
 // --- Main ---
 async function downloadTemplate() {
   try {
-    const response = await fetch('/input.xlsx')
+    const response = await fetch('/revenue-input.xlsx')
     if (!response.ok) throw new Error('Không tải được file mẫu')
     const blob = await response.blob()
-    saveAs(blob, 'input.xlsx')
+    saveAs(blob, 'revenue-input.xlsx')
   } catch (error) {
     alert('❌ Lỗi tải file mẫu: ' + error.message)
   }
