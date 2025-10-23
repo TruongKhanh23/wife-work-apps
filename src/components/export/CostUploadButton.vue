@@ -493,7 +493,7 @@ async function handleFileUpload(e) {
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
-    let soChungTu = lastSoChungTu - slices.length + 1
+    let soChungTu = Math.max(1, (lastSoChungTu || 0) - slices.length + 1)
 
     slices.forEach((slice) => {
       const newSlice = [...slice]
