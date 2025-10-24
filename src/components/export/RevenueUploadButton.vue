@@ -503,12 +503,14 @@ async function handleFileUpload(e) {
       return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
     })
 
-    let soChungTu = lastSoChungTu - filteredSlices.length + 1
+    let soChungTu = lastSoChungTu
+
     filteredSlices.forEach((slice) => {
+      soChungTu++
       const newSlice = [...slice]
       const branchUnit = findBranchUnitByMomoName(storeName)
       newSlice.splice(newSlice.length - 1, 0, branchUnit)
-      allCombinedData.push([soChungTu++, ...newSlice, storeName])
+      allCombinedData.push([soChungTu, ...newSlice, storeName])
     })
   })
 
