@@ -499,8 +499,12 @@ async function handleFileUpload(e) {
 
     const filteredSlices = slices.filter((slice) => {
       const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
-      if (selectedChannels.value.length === channels.length) return true
-      return selectedChannels.value.some((m) => lastValue.includes(m.toLowerCase()))
+      if (selectedChannels.value.length === channels.length) {
+        return selectedChannels.value.some((ch) => isRowInChannelDateRange(slice, ch))
+      }
+      return selectedChannels.value.some(
+        (ch) => lastValue.includes(ch.toLowerCase()) && isRowInChannelDateRange(slice, ch),
+      )
     })
 
     let soChungTu = lastSoChungTu
