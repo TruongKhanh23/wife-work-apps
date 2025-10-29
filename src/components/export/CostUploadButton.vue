@@ -142,8 +142,14 @@ const fileInput = ref(null)
 const channels = [
   { label: 'Bank', value: 'Bank' },
   { label: 'Momo', value: 'Momo' },
+  { label: 'GrabFood', value: 'GrabFood' },
+  { label: 'BeFood', value: 'BeFood' },
   { label: 'ZaloPay', value: 'ZaloPay' },
+  { label: 'XanhSM', value: 'XanhSM' },
+  { label: 'Vill', value: 'Vill' },
+  { label: 'Ryo', value: 'Ryo' },
   { label: 'VNPay', value: 'VNPay' },
+  { label: 'ShopeeFood', value: 'ShopeeFood' },
 ]
 
 const selectedChannels = ref([])
