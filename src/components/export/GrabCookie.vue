@@ -1,7 +1,7 @@
 <template>
   <div>
     <TextArea
-      v-model="cookie"
+      v-model="model"
       label="Cookie"
       placeholder="Enter cookie value..."
     />
@@ -9,17 +9,33 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import TextArea from '../forms/FormElements/TextArea.vue'
 import { useApi } from '@/composables/useApi'
-import { useStore } from 'vuex';
+import { useStore } from 'vuex'
 
-const cookie = ref('')
+/* ① nhận từ parent */
+const props = defineProps({
+  cookie: {
+    type: String,
+    default: ''
+  }
+})
 
-const { callApi, loading, error } = useApi()
-const store = useStore();
+/* ② emit */
+const emit = defineEmits(['update:cookie'])
 
-watch(cookie, async (val) => {
+/* ③ 2 chiều */
+const model = computed({
+  get: () => props.cookie,
+  set: (val) => emit('update:cookie', val)
+})
+
+const { callApi } = useApi()
+const store = useStore()
+
+/* ④ side-effect khi cookie đổi */
+watch(model, async (val) => {
   if (!val?.trim()) return
 
   try {
@@ -36,5 +52,4 @@ watch(cookie, async (val) => {
     store.dispatch('setGrabMerchants', data?.merchants || [])
   } catch {}
 })
-
 </script>
