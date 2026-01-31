@@ -12,10 +12,12 @@
 import { ref, watch } from 'vue'
 import TextArea from '../forms/FormElements/TextArea.vue'
 import { useApi } from '@/composables/useApi'
+import { useStore } from 'vuex';
 
 const cookie = ref('')
 
 const { callApi, loading, error } = useApi()
+const store = useStore();
 
 watch(cookie, async (val) => {
   if (!val?.trim()) return
@@ -32,6 +34,7 @@ watch(cookie, async (val) => {
     })
 
     console.log(data)
+    store.dispatch('setGrabMerchants', data?.merchants || [])
   } catch {}
 })
 

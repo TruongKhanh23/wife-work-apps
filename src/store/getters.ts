@@ -1,5 +1,5 @@
-import type { State } from '@/store/state'
+import { getters as grabMerchants } from '@/store/grab/grabMerchants/getters'
 
 export const getters = {
-  count: (state: State) => state.count,
+  ...grabMerchants,
 }

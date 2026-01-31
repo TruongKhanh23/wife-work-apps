@@ -1,6 +1,7 @@
+import type { GrabMerchant } from '@/types'
 export interface State {
-  count: number
+  grabMerchants: GrabMerchant[]
 }
 export const state: State = {
-  count: 0,
+  grabMerchants: [],
 }

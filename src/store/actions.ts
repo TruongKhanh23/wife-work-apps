@@ -1,8 +1,5 @@
+import { actions as grabMerchants } from '@/store/grab/grabMerchants/actions'
+
 export const actions = {
-  increment(context: { commit: Function }) {
-    context.commit('increment')
-  },
-  decrement(context: { commit: Function }) {
-    context.commit('decrement')
-  },
+  ...grabMerchants,
 }

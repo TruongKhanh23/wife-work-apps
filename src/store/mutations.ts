@@ -1,10 +1,5 @@
-import type { State } from '@/store/state'
+import { mutations as grabMerchants } from '@/store/grab/grabMerchants/mutations'
 
 export const mutations = {
-  increment(state: State) {
-    state.count++
-  },
-  decrement(state: State) {
-    state.count--
-  },
+  ...grabMerchants,
 }
