@@ -22,11 +22,17 @@ watch(cookie, async (val) => {
 
   try {
     const data = await callApi({
-      endpoint: '/api/hello',
-      method: 'GET'
+      endpoint: '/api/grab/catalog-stores',
+      method: 'POST',
+      params: {
+        offset: 0,
+        limit: 100,
+        cookie: val
+      }
     })
 
-    console.log('API response:', data)
-  } catch (_) {}
+    console.log(data)
+  } catch {}
 })
+
 </script>
