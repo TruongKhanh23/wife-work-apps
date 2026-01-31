@@ -22,6 +22,10 @@ export function useRecentFiles() {
     files.value = files.value.filter((f) => f.id !== id)
   }
 
+  function resetFiles() {
+    files.value.length = 0
+  }
+
   function downloadFile(file) {
     saveAs(file.blob, file.name)
   }
@@ -45,5 +49,6 @@ export function useRecentFiles() {
     removeFile,
     downloadFile,
     downloadAll,
+    resetFiles,
   }
 }

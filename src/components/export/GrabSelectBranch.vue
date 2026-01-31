@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="relative z-20 bg-transparent">
-      <MultipleSelect v-model="model" :options="grabMerchantOptions" :is-multi="true">
-        <template #label> Select Merchants </template>
+      <MultipleSelect v-model="model" :options="grabMerchantOptions" :is-multi="true" >
+        <template #label> Select Merchant(s) </template>
       </MultipleSelect>
     </div>
   </div>

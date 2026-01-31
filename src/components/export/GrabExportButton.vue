@@ -57,6 +57,7 @@ function handleClickExport() {
 
 function stopProcessing() {
   stopFlag.value = true
+  isLoading.value = false
   emit('stop')
 }
 </script>

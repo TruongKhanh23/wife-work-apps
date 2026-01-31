@@ -21,7 +21,7 @@
             type="text"
             :readonly="!isOpen"
             :disabled="isDisabled"
-            :placeholder="selectedLabels.length ? '' : 'Vui lòng chọn'"
+            :placeholder="selectedLabels.length ? '' : placeholder"
             class="w-full bg-transparent focus:outline-none pr-6"
             @focus="handleFocus"
             @keydown.stop
@@ -117,6 +117,10 @@ const props = defineProps({
     default: '',
   },
   errorMessage: String,
+  placeholder: {
+    type: String,
+    default: 'Please select...',
+  },
   isDisabled: Boolean,
   isMulti: {
     type: Boolean,

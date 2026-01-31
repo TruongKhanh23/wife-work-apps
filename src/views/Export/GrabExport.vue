@@ -12,7 +12,7 @@
               <div class="flex flex-col gap-4">
                 <GrabSelectBranch v-model:selectedMerchants="selectedGrabMerchants" />
                 <GrabSelectDate v-model:rangeDate="dateList" />
-                <GrabExportButton @export="handleExport" />
+                <GrabExportButton @export="handleExport" @stop="handleStopExport" />
                 <RecentFiles
                   :files="files"
                   @download="downloadFile"
@@ -51,6 +51,7 @@ const {
   addFile,
   downloadFile,
   downloadAll,
+  resetFiles,
   removeFile,
 } = useRecentFiles()
 const store = useStore()
@@ -58,12 +59,16 @@ const currentPageTitle = ref('Grab Export')
 const dateList = ref([])
 const selectedGrabMerchants = ref([])
 const cookie = ref('')
+const isStopped = ref(false)
+
+function handleStopExport() {
+  isStopped.value = true
+}
 
 async function handleExport({ stopFlag, done }) {
+  resetFiles()
+  isStopped.value = false
   try {
-    console.log('🚀 Start export...')
-    console.log('selectedGrabMerchants.value', selectedGrabMerchants.value)
-
     const merchantInfos = store.getters.getGrabMerchants.map((m) => ({
       id: m.merchantID,
       name: m.merchantName.replace(/^Cà\s*Phê\s*Muối\s*Chú\s*Long\s*-?\s*/i, '').trim(),
@@ -74,9 +79,8 @@ async function handleExport({ stopFlag, done }) {
         ? merchantInfos.filter((m) => selectedGrabMerchants.value.includes(m.id))
         : merchantInfos
 
-    console.log('targetMerchants', targetMerchants)
-
     for (const { id: merchantId, name: merchantName } of targetMerchants) {
+      if (isStopped.value) break
       const safeName = merchantName.replace(/[/\\?%*:|"<>]/g, '_')
       const dataByDate = {}
 
@@ -84,10 +88,9 @@ async function handleExport({ stopFlag, done }) {
       // FETCH DATA
       // =========================
       const dates = dateList.value.split(',').map((d) => d.trim())
-      console.log('dates', dates)
 
       for (const dateStr of dates) {
-        console.log('dateStr', dateStr)
+        if (isStopped.value) break
 
         const intervals = [
           { startHour: 0, endHour: 11 },
@@ -98,6 +101,7 @@ async function handleExport({ stopFlag, done }) {
 
         try {
           for (const { startHour, endHour } of intervals) {
+            if (isStopped.value) break
             console.log(
               `⏳ Fetching orders ${merchantName} - ${dateStr} ${startHour}:00-${endHour}:59`,
             )
@@ -129,7 +133,7 @@ async function handleExport({ stopFlag, done }) {
           console.error(`❌ ${merchantName} - ${dateStr}`, err)
         }
       }
-
+      if (isStopped.value) break
       // =========================
       // EXPORT EXCEL
       // =========================
