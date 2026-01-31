@@ -51,10 +51,8 @@ export default async function handler(req, res) {
     let pageIndex = 0
     const pageSize = 150
     const orderIds = []
-    let hasMore = true
 
-    // pagination loop
-    while (hasMore) {
+    while (true) {
       const params = {
         states: '',
         startTime: start,
@@ -62,15 +60,15 @@ export default async function handler(req, res) {
         pageIndex,
         pageSize,
       }
-      console.log('params', params)
 
       const response = await axios.get(url, { headers, params })
 
       const statements = response.data?.statements ?? []
 
+      if (statements.length === 0) break
+
       orderIds.push(...statements.map((s) => s.ID))
 
-      hasMore = statements.length === pageSize
       pageIndex++
     }
 

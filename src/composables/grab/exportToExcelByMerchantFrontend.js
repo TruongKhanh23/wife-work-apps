@@ -1,15 +1,23 @@
 import ExcelJS from 'exceljs'
+
+function toSafeSheetName(dateStr) {
+  const [d, m, y] = dateStr.split('/')
+  return `${y}-${m}-${d}`
+}
+
 export async function exportToExcelByMerchantFrontend(merchantName, newDataByDate) {
   const workbook = new ExcelJS.Workbook()
 
   for (const [dateStr, rows] of Object.entries(newDataByDate)) {
-    const sheet = workbook.addWorksheet(dateStr)
+    const safeSheetName = toSafeSheetName(dateStr)
+
+    const sheet = workbook.addWorksheet(safeSheetName)
 
     sheet.columns = [
       { header: 'Merchant ID', key: 'merchantid', width: 25 },
       { header: 'Order ID', key: 'order_id', width: 30 },
       { header: 'Display ID', key: 'displayID', width: 15 },
-      { header: 'Item Name', key: 'order_item_name', width: 30 },
+      { header: 'Item Name', key: 'item_name', width: 30 },
       { header: 'Quantity', key: 'quantity', width: 10 },
       { header: 'Size', key: 'size', width: 10 },
       { header: 'Date', key: 'date', width: 12 },
@@ -21,7 +29,6 @@ export async function exportToExcelByMerchantFrontend(merchantName, newDataByDat
     rows.forEach((row) => sheet.addRow(row))
   }
 
-  // ⭐ frontend download
   const buffer = await workbook.xlsx.writeBuffer()
 
   const blob = new Blob([buffer], {
@@ -36,6 +43,4 @@ export async function exportToExcelByMerchantFrontend(merchantName, newDataByDat
   a.click()
 
   window.URL.revokeObjectURL(url)
-
-  console.log(`✅ Downloaded ${merchantName}.xlsx`)
 }

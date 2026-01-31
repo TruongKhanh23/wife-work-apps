@@ -5,7 +5,7 @@ export function useFetchOrderIds() {
   const error = ref(null)
   const orderIds = ref([])
 
-  const fetchOrderIds = async ({ cookie, merchantId, dateStr, startHour = 8, endHour = 22 }) => {
+  const fetchOrderIds = async ({ cookie, merchantId, dateStr, startHour = 8, endHour = 23 }) => {
     loading.value = true
     error.value = null
 

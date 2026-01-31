@@ -47,23 +47,19 @@ const cookie = ref('')
 async function handleExport({ stopFlag, done }) {
   try {
     console.log('🚀 Start export...')
-    console.log('selectedGrabMerchants.value', selectedGrabMerchants.value);
+    console.log('selectedGrabMerchants.value', selectedGrabMerchants.value)
 
     const merchantInfos = store.getters.getGrabMerchants.map((m) => ({
       id: m.merchantID,
-      name: m.merchantName
-        .replace(/^Cà\s*Phê\s*Muối\s*Chú\s*Long\s*-?\s*/i, '')
-        .trim(),
+      name: m.merchantName.replace(/^Cà\s*Phê\s*Muối\s*Chú\s*Long\s*-?\s*/i, '').trim(),
     }))
 
     const targetMerchants =
       selectedGrabMerchants.value.length > 0
-        ? merchantInfos.filter((m) =>
-            selectedGrabMerchants.value.includes(m.id),
-          )
+        ? merchantInfos.filter((m) => selectedGrabMerchants.value.includes(m.id))
         : merchantInfos
 
-    console.log('targetMerchants', targetMerchants);
+    console.log('targetMerchants', targetMerchants)
 
     for (const { id: merchantId, name: merchantName } of targetMerchants) {
       const safeName = merchantName.replace(/[/\\?%*:|"<>]/g, '_')
@@ -72,34 +68,44 @@ async function handleExport({ stopFlag, done }) {
       // =========================
       // FETCH DATA
       // =========================
-      const dates = dateList.value.split(',').map(d => d.trim())
-      console.log('dates', dates);
+      const dates = dateList.value.split(',').map((d) => d.trim())
+      console.log('dates', dates)
 
       for (const dateStr of dates) {
-        console.log('dateStr', dateStr);
+        console.log('dateStr', dateStr)
+
+        const intervals = [
+          { startHour: 0, endHour: 11 },
+          { startHour: 12, endHour: 23 },
+        ]
 
         const allRows = []
 
         try {
-          const orderIds = await fetchOrderIds({
-            cookie: cookie.value,
-            merchantId,
-            dateStr,
-          })
-          console.log('orderIds', orderIds);
+          for (const { startHour, endHour } of intervals) {
+            console.log(
+              `⏳ Fetching orders ${merchantName} - ${dateStr} ${startHour}:00-${endHour}:59`,
+            )
+            const orderIds = await fetchOrderIds({
+              cookie: cookie.value,
+              merchantId,
+              dateStr,
+              startHour,
+              endHour,
+            })
+            console.log('orderIds', orderIds)
 
-          const uniqueIds = [...new Set(orderIds)]
+            const uniqueIds = [...new Set(orderIds)]
 
-          // ⚡ fetch song song nhanh hơn
-          const detailResults = await Promise.all(
-            uniqueIds.map((id) =>
-              fetchOrderDetail(id, merchantId, cookie.value, dateStr),
-            ),
-          )
+            // ⚡ fetch song song nhanh hơn
+            const detailResults = await Promise.all(
+              uniqueIds.map((id) => fetchOrderDetail(id, merchantId, cookie.value, dateStr)),
+            )
 
-          detailResults.forEach((rows) => {
-            allRows.push(...rows)
-          })
+            detailResults.forEach((rows) => {
+              allRows.push(...rows)
+            })
+          }
 
           if (allRows.length) {
             dataByDate[dateStr] = allRows
