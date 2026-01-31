@@ -11,6 +11,7 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <GrabSelectBranch />
+                <VuexSample />
               </div>
             </div>
           </div>
@@ -26,6 +27,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import GrabSelectBranch from '@/components/export/GrabSelectBranch.vue'
 import GrabCookie from '@/components/export/GrabCookie.vue'
+import VuexSample from '@/components/VuexSample.vue'
 
 const currentPageTitle = ref('Grab Export')
 </script>
