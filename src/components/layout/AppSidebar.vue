@@ -218,6 +218,9 @@ import {
   MoreDots,
   BotIcon,
   CallIcon,
+  GrabIcon,
+  BeIcon,
+  ExcelIcon,
 } from '../../icons'
 import SidebarWidget from './SidebarWidget.vue'
 import BoxCubeIcon from '@/icons/BoxCubeIcon.vue'
@@ -233,27 +236,27 @@ const menuGroups = [
     items: [
       {
         name: 'Cost Export',
-        icon: TaskIcon,
+        icon: ExcelIcon,
         path: '/cost-export',
       },
       {
         name: 'Revenue Export',
-        icon: TaskIcon,
+        icon: ExcelIcon,
         path: '/revenue-export',
       },
       {
         name: 'Be Export',
-        icon: TaskIcon,
+        icon: BeIcon,
         path: '/be-export',
       },
       {
         name: 'Grab Export',
-        icon: TaskIcon,
+        icon: GrabIcon,
         path: '/grab-export',
       },
       {
         name: 'Add Donvi column',
-        icon: TaskIcon,
+        icon: ExcelIcon,
         path: '/add-donvi-column',
       },
     ],

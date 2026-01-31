@@ -48,6 +48,9 @@ import BarChartIcon from './BarChartIcon.vue'
 import CartIcon from './CartIcon.vue'
 import BotIcon from './BotIcon.vue'
 import CallIcon from './CallIcon.vue'
+import GrabIcon from './GrabIcon.vue'
+import BeIcon from './BeIcon.vue'
+import ExcelIcon from './ExcelIcon.vue'
 
 export {
   CallIcon,
@@ -100,4 +103,7 @@ export {
   SendIcon,
   DraftIcon,
   MoreDots,
+  GrabIcon,
+  BeIcon,
+  ExcelIcon,
 }
