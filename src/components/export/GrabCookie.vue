@@ -33,7 +33,6 @@ watch(cookie, async (val) => {
       }
     })
 
-    console.log(data)
     store.dispatch('setGrabMerchants', data?.merchants || [])
   } catch {}
 })

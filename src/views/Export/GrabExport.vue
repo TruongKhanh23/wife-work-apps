@@ -9,7 +9,7 @@
           <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4 min-h-screen">
             <GrabCookie />
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div class="w-full">
                 <GrabSelectBranch />
               </div>
             </div>

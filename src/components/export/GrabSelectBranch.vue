@@ -1,29 +1,25 @@
 <template>
   <div>
-    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-      Select Branch
-    </label>
     <div class="relative z-20 bg-transparent">
-      <select
-        v-model="selectedBranch"
-        class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-      >
-        <option value="all" selected>All Branches</option>
-        <option v-for="acc in branches" :key="acc.branch" :value="acc.branch">
-          {{ acc.branch }}
-        </option>
-      </select>
-      <span
-        class="absolute z-30 text-gray-500 -translate-y-1/2 pointer-events-none right-4 top-1/2 dark:text-gray-400"
-      >
-        <ChevronDownIcon />
-      </span>
+      <MultipleSelect v-model="selectedMerchant" :options="grabMerchantOptions" :is-multi="true">
+        <template #label> Select Merchants </template>
+      </MultipleSelect>
     </div>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
-import { ChevronDownIcon } from '@/icons';
-const selectedBranch = ref('all')
-const accounts = ref([])
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
+import MultipleSelect from '../forms/FormElements/MultipleSelect.vue'
+
+const store = useStore()
+const selectedMerchant = ref([])
+
+const grabMerchants = computed(() => store.state.grabMerchants || [])
+const grabMerchantOptions = computed(() =>
+  grabMerchants.value.map((item) => ({
+    value: item.merchantID,
+    label: item.merchantName,
+  }))
+)
 </script>
