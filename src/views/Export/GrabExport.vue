@@ -12,7 +12,12 @@
               <div class="flex flex-col gap-4">
                 <GrabSelectBranch v-model:selectedMerchants="selectedGrabMerchants" />
                 <GrabSelectDate v-model:rangeDate="dateList" />
-                <GrabExportButton @export="handleExport" @stop="handleStopExport" />
+                <GrabExportButton
+                  :process-text="processText"
+                  :percent="percent"
+                  @export="handleExport"
+                  @stop="handleStopExport"
+                />
                 <RecentFiles
                   :files="files"
                   @download="downloadFile"
@@ -46,20 +51,15 @@ import { useRecentFiles } from '@/composables/file/useRecentFiles'
 const { loadingFetchOrderIds, errorFetchOrderIds, orderIds, fetchOrderIds } = useFetchOrderIds()
 const { loadingFetchOrderDetail, errorFetchOrderDetail, fetchOrderDetail } = useFetchOrderDetail()
 
-const {
-  files,
-  addFile,
-  downloadFile,
-  downloadAll,
-  resetFiles,
-  removeFile,
-} = useRecentFiles()
+const { files, addFile, downloadFile, downloadAll, resetFiles, removeFile } = useRecentFiles()
 const store = useStore()
 const currentPageTitle = ref('Grab Export')
 const dateList = ref([])
 const selectedGrabMerchants = ref([])
 const cookie = ref('')
 const isStopped = ref(false)
+const processText = ref('')
+const percent = ref(0)
 
 function handleStopExport() {
   isStopped.value = true
@@ -88,6 +88,11 @@ async function handleExport({ stopFlag, done }) {
       // FETCH DATA
       // =========================
       const dates = dateList.value.split(',').map((d) => d.trim())
+      const intervals = 2
+
+      const totalSteps = targetMerchants.length * dates.length * intervals
+
+      let currentStep = 0
 
       for (const dateStr of dates) {
         if (isStopped.value) break
@@ -102,9 +107,10 @@ async function handleExport({ stopFlag, done }) {
         try {
           for (const { startHour, endHour } of intervals) {
             if (isStopped.value) break
-            console.log(
-              `⏳ Fetching orders ${merchantName} - ${dateStr} ${startHour}:00-${endHour}:59`,
-            )
+            currentStep++
+            percent.value = Math.round((currentStep / totalSteps) * 100)
+
+            processText.value = `⏳ Fetching ${merchantName} - ${dateStr} ${startHour}:00-${endHour}:59`
             const orderIds = await fetchOrderIds({
               cookie: cookie.value,
               merchantId,
@@ -145,6 +151,8 @@ async function handleExport({ stopFlag, done }) {
       })
     }
   } finally {
+    processText.value = ''
+    percent.value = 0
     done()
   }
 }

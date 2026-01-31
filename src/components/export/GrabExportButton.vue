@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-2 flex-wrap">
+  <div class="flex gap-3 items-center flex-wrap">
     <!-- Export + Spinner -->
     <button
       @click="handleClickExport"
@@ -32,11 +32,30 @@
     >
       Stop
     </button>
+    <div
+      v-if="isLoading && processText"
+      class="mt-6 flex flex-row gap-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap items-center"
+    >
+      <div class="w-48 h-10 bg-gray-200 rounded">
+        <div
+          class="h-10 bg-brand-500 rounded transition-all py-2 text-white text-center"
+          :style="{ width: percent + '%' }"
+        >{{ percent }}%</div>
+      </div>
+      <div>
+        {{ processText }}
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineProps } from 'vue'
+
+const props = defineProps({
+  processText: String,
+  percent: Number,
+})
 
 const emit = defineEmits(['export', 'stop'])
 
@@ -51,7 +70,7 @@ function handleClickExport() {
 
   emit('export', {
     stopFlag,
-    done: () => (isLoading.value = false)
+    done: () => (isLoading.value = false),
   })
 }
 
@@ -61,6 +80,5 @@ function stopProcessing() {
   emit('stop')
 }
 </script>
-
 
 <style scoped></style>
