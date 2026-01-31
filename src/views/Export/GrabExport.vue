@@ -88,11 +88,6 @@ async function handleExport({ stopFlag, done }) {
       // FETCH DATA
       // =========================
       const dates = dateList.value.split(',').map((d) => d.trim())
-      const intervals = 2
-
-      const totalSteps = targetMerchants.length * dates.length * intervals
-
-      let currentStep = 0
 
       for (const dateStr of dates) {
         if (isStopped.value) break
@@ -105,31 +100,51 @@ async function handleExport({ stopFlag, done }) {
         const allRows = []
 
         try {
+          // =========================
+          // PHASE 1 — FETCH IDS
+          // =========================
+          let allIds = []
+
           for (const { startHour, endHour } of intervals) {
             if (isStopped.value) break
-            currentStep++
-            percent.value = Math.round((currentStep / totalSteps) * 100)
 
-            processText.value = `⏳ Fetching ${merchantName} - ${dateStr} ${startHour}:00-${endHour}:59`
-            const orderIds = await fetchOrderIds({
+            processText.value = `📦 Fetching Order IDs ${merchantName} ${dateStr} ${startHour}h-${endHour}h`
+
+            const ids = await fetchOrderIds({
               cookie: cookie.value,
               merchantId,
               dateStr,
               startHour,
               endHour,
             })
-            console.log('orderIds', orderIds)
 
-            const uniqueIds = [...new Set(orderIds)]
+            allIds.push(...ids)
+          }
 
-            // ⚡ fetch song song nhanh hơn
-            const detailResults = await Promise.all(
-              uniqueIds.map((id) => fetchOrderDetail(id, merchantId, cookie.value, dateStr)),
-            )
+          const uniqueIds = [...new Set(allIds)]
 
-            detailResults.forEach((rows) => {
-              allRows.push(...rows)
-            })
+          // ======= 30% cho phase ID =======
+          percent.value = 30
+
+          // =========================
+          // PHASE 2 — FETCH DETAILS
+          // =========================
+          let doneCount = 0
+          const totalDetails = uniqueIds.length || 1
+
+          for (const id of uniqueIds) {
+            if (isStopped.value) break
+
+            processText.value = `🧾 Fetching Order Details: ${doneCount + 1}/${totalDetails} (orders) - ${merchantName} ${dateStr}`
+
+            const rows = await fetchOrderDetail(id, merchantId, cookie.value, dateStr)
+
+            allRows.push(...rows)
+
+            doneCount++
+
+            // ======= 30% -> 95% =======
+            percent.value = 30 + Math.floor((doneCount / totalDetails) * 65)
           }
 
           if (allRows.length) {
@@ -139,6 +154,7 @@ async function handleExport({ stopFlag, done }) {
           console.error(`❌ ${merchantName} - ${dateStr}`, err)
         }
       }
+
       if (isStopped.value) break
       // =========================
       // EXPORT EXCEL
