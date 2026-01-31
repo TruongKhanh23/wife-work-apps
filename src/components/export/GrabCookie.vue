@@ -45,11 +45,28 @@ watch(model, async (val) => {
       params: {
         offset: 0,
         limit: 100,
-        cookie: val
-      }
+        cookie: val,
+      },
     })
 
     store.dispatch('setGrabMerchants', data?.merchants || [])
-  } catch {}
+  } catch (err) {
+    console.log('err', err.message);
+
+    const error = err.message
+
+    if (error === "HTTP 500") {
+      alert('⚠️ Cookie hết hạn, vui lòng đăng nhập lại Grab và copy cookie mới')
+
+      // optional: clear merchants
+      store.dispatch('setGrabMerchants', [])
+      emit('update:cookie', '')
+
+      return
+    }
+
+    console.error(err)
+  }
 })
+
 </script>
