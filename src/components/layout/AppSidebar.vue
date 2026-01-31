@@ -247,6 +247,11 @@ const menuGroups = [
         path: '/be-export',
       },
       {
+        name: 'Grab Export',
+        icon: TaskIcon,
+        path: '/grab-export',
+      },
+      {
         name: 'Add Donvi column',
         icon: TaskIcon,
         path: '/add-donvi-column',

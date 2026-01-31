@@ -39,6 +39,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/grab-export',
+      name: 'Grab Export',
+      component: () => import('../views/Export/GrabExport.vue'),
+      meta: {
+        title: 'Grab Export',
+      },
+    },
+    {
       path: '/',
       name: 'Ecommerce',
       component: () => import('../views/Export/RevenueExport.vue'),
