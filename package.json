@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "vercel:dev": "vercel dev",
     "build": "DEPLOY_TIME=\"$(date +'%d/%m/%Y %H:%M:%S')\" run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",

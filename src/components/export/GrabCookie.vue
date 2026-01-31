@@ -11,12 +11,22 @@
 <script setup>
 import { ref, watch } from 'vue'
 import TextArea from '../forms/FormElements/TextArea.vue'
+import { useApi } from '@/composables/useApi'
 
 const cookie = ref('')
 
-watch(cookie, (val) => {
-  if (val && val.trim() !== '') {
-    console.log('Cookie value:', val)
-  }
+const { callApi, loading, error } = useApi()
+
+watch(cookie, async (val) => {
+  if (!val?.trim()) return
+
+  try {
+    const data = await callApi({
+      endpoint: '/api/hello',
+      method: 'GET'
+    })
+
+    console.log('API response:', data)
+  } catch (_) {}
 })
 </script>
