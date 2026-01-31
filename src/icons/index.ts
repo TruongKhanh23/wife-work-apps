@@ -51,6 +51,7 @@ import CallIcon from './CallIcon.vue'
 import GrabIcon from './GrabIcon.vue'
 import BeIcon from './BeIcon.vue'
 import ExcelIcon from './ExcelIcon.vue'
+import DownloadIcon from './DownloadIcon.vue'
 
 export {
   CallIcon,
@@ -106,4 +107,5 @@ export {
   GrabIcon,
   BeIcon,
   ExcelIcon,
+  DownloadIcon,
 }

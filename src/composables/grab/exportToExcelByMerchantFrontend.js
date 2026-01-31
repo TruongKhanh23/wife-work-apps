@@ -2,16 +2,35 @@ import ExcelJS from 'exceljs'
 
 function toSafeSheetName(dateStr) {
   const [d, m, y] = dateStr.split('/')
-  return `${y}-${m}-${d}`
+  return `${y}-${m}-${d}`.replace(/[\\/*?:[\]]/g, '_').slice(0, 31)
+}
+
+function normalizeRow(row) {
+  const safe = {}
+
+  for (const k in row) {
+    const v = row[k]
+
+    if (v === null || v === undefined) {
+      safe[k] = ''
+    } else if (v instanceof Date) {
+      safe[k] = v
+    } else if (typeof v === 'object') {
+      safe[k] = JSON.stringify(v) // ⭐ QUAN TRỌNG
+    } else {
+      safe[k] = v
+    }
+  }
+
+  return safe
 }
 
 export async function exportToExcelByMerchantFrontend(merchantName, newDataByDate) {
   const workbook = new ExcelJS.Workbook()
 
   for (const [dateStr, rows] of Object.entries(newDataByDate)) {
-    const safeSheetName = toSafeSheetName(dateStr)
-
-    const sheet = workbook.addWorksheet(safeSheetName)
+    console.log('rows', rows)
+    const sheet = workbook.addWorksheet(toSafeSheetName(dateStr))
 
     sheet.columns = [
       { header: 'Merchant ID', key: 'merchantid', width: 25 },
@@ -26,21 +45,14 @@ export async function exportToExcelByMerchantFrontend(merchantName, newDataByDat
       { header: 'Note', key: 'note', width: 40 },
     ]
 
-    rows.forEach((row) => sheet.addRow(row))
+    rows.forEach((row) => {
+      sheet.addRow(normalizeRow(row))
+    })
   }
 
   const buffer = await workbook.xlsx.writeBuffer()
 
-  const blob = new Blob([buffer], {
+  return new Blob([new Uint8Array(buffer)], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   })
-
-  const url = window.URL.createObjectURL(blob)
-
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${merchantName}.xlsx`
-  a.click()
-
-  window.URL.revokeObjectURL(url)
 }

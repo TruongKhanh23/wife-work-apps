@@ -13,6 +13,12 @@
                 <GrabSelectBranch v-model:selectedMerchants="selectedGrabMerchants" />
                 <GrabSelectDate v-model:rangeDate="dateList" />
                 <GrabExportButton @export="handleExport" />
+                <RecentFiles
+                  :files="files"
+                  @download="downloadFile"
+                  @delete="removeFile"
+                  @download-all="downloadAll"
+                />
               </div>
             </div>
           </div>
@@ -34,10 +40,19 @@ import GrabExportButton from '@/components/export/GrabExportButton.vue'
 import { useFetchOrderIds } from '@/composables/grab/useFetchOrderIds'
 import { useFetchOrderDetail } from '@/composables/grab/useFetchOrderDetail.js'
 import { exportToExcelByMerchantFrontend } from '@/composables/grab/exportToExcelByMerchantFrontend.js'
+import RecentFiles from '@/components/file-manager/RecentFiles.vue'
+import { useRecentFiles } from '@/composables/file/useRecentFiles'
 
 const { loadingFetchOrderIds, errorFetchOrderIds, orderIds, fetchOrderIds } = useFetchOrderIds()
 const { loadingFetchOrderDetail, errorFetchOrderDetail, fetchOrderDetail } = useFetchOrderDetail()
 
+const {
+  files,
+  addFile,
+  downloadFile,
+  downloadAll,
+  removeFile,
+} = useRecentFiles()
 const store = useStore()
 const currentPageTitle = ref('Grab Export')
 const dateList = ref([])
@@ -118,7 +133,12 @@ async function handleExport({ stopFlag, done }) {
       // =========================
       // EXPORT EXCEL
       // =========================
-      await exportToExcelByMerchantFrontend(safeName, dataByDate)
+      const blob = await exportToExcelByMerchantFrontend(safeName, dataByDate)
+
+      addFile({
+        name: `${safeName}.xlsx`,
+        blob,
+      })
     }
   } finally {
     done()
