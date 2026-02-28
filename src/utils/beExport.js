@@ -31,20 +31,24 @@ function getDateRange(start, end) {
 
 // ==== API CALLS ====
 async function login(account) {
-  const rawAccount = account.account?.trim()
+  const rawAccount = String(account.account ?? '').trim()
 
+  // Detect Vietnamese phone number (10 digits, start with 03/05/07/08/09)
   const vnPhoneRegex = /^(0[35789])[0-9]{8}$/
   const isVietnamPhone = vnPhoneRegex.test(rawAccount)
 
-  const phoneNo = isVietnamPhone ? rawAccount.replace(/^0/, '+84') : null
+  const normalizedAccount = isVietnamPhone ? rawAccount.replace(/^0/, '+84') : rawAccount
+
+  // Ensure password is always string
+  const password = String(account.password ?? '')
 
   const body = {
     operator_token: OPERATOR_TOKEN,
     device_type: DEVICE_TYPE,
     access_token: 'PENDING',
     merchant_id: account.merchantId,
-    ...(isVietnamPhone ? { phone_no: phoneNo } : { email: rawAccount }),
-    password: account.password,
+    ...(isVietnamPhone ? { phone_no: normalizedAccount } : { email: normalizedAccount }),
+    password,
     device_token: '',
     device_name: '',
     locale: 'vi',
@@ -135,11 +139,13 @@ export async function exportOrdersToExcel(
 
   try {
     const token = await login(account)
+
     const stores = await getStores(token, account)
     const matchedStore = stores.find((s) =>
       s.store_name.toLowerCase().includes(account.branch.toLowerCase()),
     )
     if (!matchedStore) {
+      console.log('went here 28.02 !matchedStore')
       account.status = 'Error'
       return null
     }
