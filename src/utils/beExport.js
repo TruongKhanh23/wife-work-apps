@@ -31,12 +31,19 @@ function getDateRange(start, end) {
 
 // ==== API CALLS ====
 async function login(account) {
+  const rawAccount = account.account?.trim()
+
+  const vnPhoneRegex = /^(0[35789])[0-9]{8}$/
+  const isVietnamPhone = vnPhoneRegex.test(rawAccount)
+
+  const phoneNo = isVietnamPhone ? rawAccount.replace(/^0/, '+84') : null
+
   const body = {
     operator_token: OPERATOR_TOKEN,
     device_type: DEVICE_TYPE,
     access_token: 'PENDING',
     merchant_id: account.merchantId,
-    email: account.account,
+    ...(isVietnamPhone ? { phone_no: phoneNo } : { email: rawAccount }),
     password: account.password,
     device_token: '',
     device_name: '',
@@ -44,6 +51,7 @@ async function login(account) {
     remove_oldest_device: false,
     user_id: USER_ID,
   }
+
   const res = await axios.post(LOGIN_URL, body)
   return res.data.token
 }
