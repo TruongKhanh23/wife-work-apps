@@ -175,15 +175,12 @@ export async function exportOrdersToExcel(
         const orderItems = orderDetail?.order_items || order.order_items || []
 
         orderItems.forEach((item, index) => {
+          // ===== 1. Extract size from ( ... ) =====
           let size = 'Không rõ'
-          const customize = item.customize_object || ''
-          const matchCustomize = customize.match(/Size\s*(lớn|nhỏ)/i)
-          if (matchCustomize) size = matchCustomize[1].toLowerCase()
-          else {
-            const matchName = item.item_name.match(/-\s*(lớn|nhỏ)/i)
-            if (matchName) size = matchName[1].toLowerCase()
-          }
+          const nameMatch = item.item_name?.match(/\(([^)]+)\)/)
+          if (nameMatch) size = nameMatch[1].trim()
 
+          // ===== 2. Add main item =====
           sheet.addRow({
             restaurant_id: store_id,
             order_id: order.order_id,
@@ -195,6 +192,36 @@ export async function exportOrdersToExcel(
             thue:
               index === 0 ? (orderDetail?.vat_amount || 0) + (orderDetail?.pit_amount || 0) : '',
           })
+
+          // ===== 3. Extract toppings =====
+          const customizeText = item.customize_object || ''
+          console.log('orderId:', order.order_id)
+
+          if (order.order_id === 68162650) {
+            console.log('went here')
+
+            console.log('customizeText:', customizeText)
+          }
+
+          const toppingMatch = customizeText.match(/^Topping[^:]*:\s*([^\n]+)/i)
+
+          if (toppingMatch) {
+            const toppings = toppingMatch[1]
+              .split(/\s*,\s*/) // works for 1 OR many
+              .filter(Boolean)
+              .map((t) => t.trim())
+              .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
+
+            toppings.forEach((topping) => {
+              sheet.addRow({
+                restaurant_id: store_id,
+                order_id: order.order_id,
+                item_name: topping,
+                quantity: 1,
+                size: '',
+              })
+            })
+          }
         })
       }
       await new Promise((r) => setTimeout(r, 200))
