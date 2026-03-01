@@ -5,7 +5,7 @@ const branchMapping = [
     inventoryCode: 'CH.585QT',
     branchUnitName: 'CL-HCM-585 Quang Trung-GV',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - 585 QUANG TRUNG',
-    branchNameMomo: '',
+    branchNameMomo: 'Cà Phê Muối Chú Long - 585 Quang Trung',
   },
   {
     branchUnit: '42',
@@ -36,7 +36,7 @@ const branchMapping = [
     branchCode: 'CH.128TT',
     inventoryCode: 'CH.128TT',
     branchUnitName: 'CL-HCM-128 Thành Thái',
-    branchNameInUnitFile: 'KHÔNG DÙNG POS',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - Thành Thái',
     branchNameMomo: '',
   },
   {
@@ -44,7 +44,7 @@ const branchMapping = [
     branchCode: 'CH.308LVV',
     inventoryCode: 'CH.308LVV',
     branchUnitName: 'CL-HCM-308 Lê Văn Việt',
-    branchNameInUnitFile: 'KHÔNG DÙNG POS',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - Lê Văn Việt',
     branchNameMomo: '',
   },
   {
@@ -144,7 +144,7 @@ const branchMapping = [
     branchNameMomo: '161 NGÔ TẤT TỐ QUẦY 1',
   },
   {
-    branchUnit: '12',
+    branchUnit: '15',
     branchCode: 'CH.172HVB',
     inventoryCode: 'CH.172HVB',
     branchUnitName: 'CL-HCM-172 Huỳnh Văn Bánh',
@@ -152,7 +152,7 @@ const branchMapping = [
     branchNameMomo: '172-190 HUỲNH VĂN BÁNH',
   },
   {
-    branchUnit: '12',
+    branchUnit: '15',
     branchCode: 'CH.190HVB',
     inventoryCode: 'CH.190HVB',
     branchUnitName: 'CL-HCM-190 Huỳnh Văn Bánh',
@@ -534,6 +534,38 @@ const branchMapping = [
     branchUnitName: 'CL-LA-88 QL62 Tân An',
     branchNameInUnitFile: 'CÀ PHÊ MUỐI CHÚ LONG - LONG AN',
     branchNameMomo: '88QLLONG AN',
+  },
+  {
+    branchUnit: '19',
+    branchCode: 'CH.491ADV',
+    inventoryCode: 'CH.491ADV',
+    branchUnitName: '',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - An Dương Vương',
+    branchNameMomo: '491AN DƯƠNG VƯƠNG',
+  },
+  {
+    branchUnit: '12',
+    branchCode: 'CH.166PVT',
+    inventoryCode: 'CH.166PVT',
+    branchUnitName: '',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - Phan Văn Trị',
+    branchNameMomo: '166 PHAN VĂN TRỊ',
+  },
+  {
+    branchUnit: '74',
+    branchCode: 'CH.1TND',
+    inventoryCode: 'CH.1TND',
+    branchUnitName: '',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - Nha Trang',
+    branchNameMomo: 'NHA TRANG',
+  },
+  {
+    branchUnit: '06',
+    branchCode: 'CH.11BD',
+    inventoryCode: 'CH.11BD',
+    branchUnitName: '',
+    branchNameInUnitFile: 'Cà Phê Muối Chú Long - Bạch Đằng',
+    branchNameMomo: '111 BẠCH ĐẰNG',
   },
 ]
 
