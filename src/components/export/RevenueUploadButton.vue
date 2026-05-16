@@ -2,62 +2,117 @@
   <div
     class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]"
   >
-    <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-4">
-      <!-- Upload + Template buttons -->
-      <div class="flex flex-col gap-10 sm:flex-row sm:items-center sm:justify-start">
-        <!-- Dropdown channel -->
-        <div class="flex min-w-[605px]">
-          <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
-            <template #label> Select Channels </template>
-          </MultipleSelect>
-        </div>
-        <div class="flex flex-row justify-between w-full">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                Select Input File(s)
-              </label>
-              <div class="flex items-center gap-2">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  multiple
-                  @change="handleFileUpload"
-                  class="hidden"
-                />
-                <input
-                  type="text"
-                  :value="fileName"
-                  placeholder="Upload File..."
-                  disabled
-                  class="dark:bg-dark-900 h-11 w-full min-w-[400px] rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[200px]"
-                />
-                <button
-                  @click="$refs.fileInput.click()"
-                  :disabled="isLoading"
-                  class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 sm:w-auto"
-                >
-                  {{ isLoading ? 'Processing...' : 'Upload File' }}
-                </button>
-              </div>
-            </div>
-          </div>
+    <div class="px-4 py-4 sm:pl-6 sm:pr-4 flex flex-col gap-5">
 
-          <div class="flex gap-2 flex-wrap">
+      <!-- Row 1: Channel select -->
+      <div>
+        <MultipleSelect v-model="selectedChannels" :options="channels" :is-multi="true">
+          <template #label> Select Channels </template>
+        </MultipleSelect>
+      </div>
+
+      <!-- Row 2: File uploads + Export button -->
+      <div class="flex flex-wrap items-end gap-4">
+
+        <!-- Input File(s) -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+            Select Input File(s)
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".xlsx,.xls"
+              multiple
+              @change="handleFileUpload"
+              class="hidden"
+            />
+            <input
+              type="text"
+              :value="fileName"
+              placeholder="Upload File..."
+              disabled
+              class="dark:bg-dark-900 h-11 min-w-[280px] rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+            />
             <button
-              @click="downloadTemplate"
-              class="mt-6 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
+              @click="$refs.fileInput.click()"
+              :disabled="isLoading"
+              class="h-11 flex items-center justify-center gap-2 px-4 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 whitespace-nowrap"
             >
-              Download sample file
+              Upload File
             </button>
           </div>
         </div>
+
+        <!-- Branch Mapping File -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+            Branch Mapping File
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              ref="branchMappingInput"
+              type="file"
+              accept=".xlsx,.xls"
+              @change="handleBranchMappingUpload"
+              class="hidden"
+            />
+            <input
+              type="text"
+              :value="branchMappingFileName"
+              placeholder="branch-mapping.xlsx..."
+              disabled
+              class="dark:bg-dark-900 h-11 min-w-[280px] rounded-lg border border-gray-300 bg-transparent py-2.5 px-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+            />
+            <button
+              @click="$refs.branchMappingInput.click()"
+              :disabled="isLoading"
+              class="h-11 flex items-center justify-center gap-2 px-4 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 whitespace-nowrap"
+            >
+              Upload Mapping
+            </button>
+          </div>
+        </div>
+
+        <!-- Export button (aligned to bottom of row) -->
+        <div class="flex flex-col items-start">
+          <button
+            @click="handleExport"
+            :disabled="isLoading || !canExport"
+            class="h-11 flex items-center justify-center gap-2 px-6 text-sm font-medium text-white rounded-lg shadow-theme-xs transition-colors whitespace-nowrap"
+            :class="
+              canExport && !isLoading
+                ? 'bg-brand-600 hover:bg-brand-600 cursor-pointer'
+                : 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed'
+            "
+          >
+            <span v-if="isLoading">Processing...</span>
+            <span v-else>Export</span>
+          </button>
+        </div>
+
+        <!-- Download sample (pushed to right) -->
+        <div class="flex flex-row gap-4 ml-auto">
+          <button
+            @click="downloadTemplate('/revenue-input.xlsx')"
+            class="h-11 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 whitespace-nowrap"
+          >
+            Download sample input file
+          </button>
+           <button
+            @click="downloadTemplate('/branch-mapping.xlsx')"
+            class="h-11 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 whitespace-nowrap"
+          >
+            Download sample branch mapping file
+          </button>
+        </div>
+
       </div>
 
-      <div class="flex flex-row gap-10">
+      <div class="flex flex-col lg:flex-row gap-8">
         <!-- Date picker cho từng channel -->
-        <div class="flex flex-col gap-4 items-between min-w-[605px]">
+        <div class="flex flex-col gap-4 flex-shrink-0">
           <div v-for="channel in selectedChannels" :key="channel" class="flex items-center gap-2">
             <label class="w-24 mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
               {{ channel }}
@@ -72,6 +127,8 @@
             />
           </div>
         </div>
+
+        <!-- Hướng dẫn -->
         <div class="bg-white dark:border-gray-800 dark:bg-white/[0.03]">
           <div class="w-full max-w-[830px] flex flex-col gap-4">
             <h3
@@ -100,7 +157,7 @@
             </div>
           </div>
 
-          <!-- New: Download conversion tool -->
+          <!-- Download conversion tool -->
           <button
             @click="downloadConversionTool"
             class="shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200"
@@ -114,14 +171,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/flatpickr.css'
 import * as XLSX from 'xlsx-js-style'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import MultipleSelect from '@/components/forms/FormElements/MultipleSelect.vue'
-import branchMapping from '@/assets/branchMapping.js'
 
 /* ---------------------- FLATPICKR CONFIG ---------------------- */
 const multiDateConfig = {
@@ -130,12 +186,25 @@ const multiDateConfig = {
   altInput: true,
   altFormat: 'd/m/Y',
   allowInput: true,
-  conjunction: ', ', // hiển thị các ngày cách nhau bằng dấu phẩy
+  conjunction: ', ',
 }
 
 /* ---------------------- STATE ---------------------- */
 const fileName = ref('')
 const isLoading = ref(false)
+const fileInput = ref(null)
+
+// Branch mapping state (replaces static import)
+const branchMappingInput = ref(null)
+const branchMappingFileName = ref('')
+const branchMappingLoaded = ref(false)
+const branchMappingData = ref([])
+
+// Uploaded cost files (stored for deferred export)
+const uploadedFiles = ref([])
+
+// Can only export when both files are ready
+const canExport = computed(() => uploadedFiles.value.length > 0 && branchMappingLoaded.value)
 
 const channels = [
   { label: 'Tiền mặt', value: 'Tiền mặt' },
@@ -214,6 +283,16 @@ const DATE_COLS_FIXED = [1, 29] // B & AD
 const TEXT_COL = 21
 const MONEY_COL = 6
 
+// Expected columns in branch-mapping.xlsx
+const BRANCH_MAPPING_COLUMNS = [
+  'branchUnit',
+  'branchCode',
+  'inventoryCode',
+  'branchUnitName',
+  'branchNameInUnitFile',
+  'branchNameMomo',
+]
+
 // --- Helpers ---
 function excelDateToString(val) {
   if (val == null || val === '') return ''
@@ -266,7 +345,9 @@ function normalizeText(str) {
 
 function findBranchUnitByMomoName(tenQuan) {
   const normalized = normalizeText(tenQuan)
-  const found = branchMapping.find((b) => normalizeText(b.branchNameMomo) === normalized)
+  const found = branchMappingData.value.find(
+    (b) => normalizeText(b.branchNameMomo) === normalized,
+  )
   return found ? found.branchUnit : ''
 }
 
@@ -321,13 +402,12 @@ function applyStyles(ws, sheetData) {
         }
 
         if (jsDate && !isNaN(jsDate.getTime())) {
-          // Tính theo UTC midnight để tránh lệch timezone
-          const excelEpoch = Date.UTC(1899, 11, 30) // "1899-12-30" UTC
+          const excelEpoch = Date.UTC(1899, 11, 30)
           const utcDateMs = Date.UTC(jsDate.getFullYear(), jsDate.getMonth(), jsDate.getDate())
           const excelSerialDate = Math.round((utcDateMs - excelEpoch) / (24 * 60 * 60 * 1000))
 
           ws[cellRef] = {
-            t: 'n', // number (Excel date serial)
+            t: 'n',
             v: excelSerialDate,
             s: {
               ...ws[cellRef]?.s,
@@ -339,7 +419,6 @@ function applyStyles(ws, sheetData) {
       }
     })
 
-    // Các cell khác giữ nguyên
     const textCellRef = XLSX.utils.encode_cell({ r, c: TEXT_COL })
     if (sheetData[r][TEXT_COL] != null)
       ws[textCellRef] = { t: 's', v: sheetData[r][TEXT_COL], s: ws[textCellRef]?.s || {} }
@@ -355,38 +434,106 @@ function applyStyles(ws, sheetData) {
   }
 }
 
-// --- Main ---
-async function downloadTemplate() {
+// --- Branch Mapping Upload Handler ---
+async function handleBranchMappingUpload(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+
   try {
-    const response = await fetch('/revenue-input.xlsx')
-    if (!response.ok) throw new Error('Không tải được file mẫu')
-    const blob = await response.blob()
-    saveAs(blob, 'revenue-input.xlsx')
-  } catch (error) {
-    alert('❌ Lỗi tải file mẫu: ' + error.message)
+    const data = await file.arrayBuffer()
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheetName = workbook.SheetNames[0]
+    const sheet = workbook.Sheets[sheetName]
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+
+    if (rows.length < 2) {
+      alert('❌ File branch mapping không có dữ liệu.')
+      e.target.value = ''
+      return
+    }
+
+    const headerRow = rows[0].map((h) => (h || '').toString().trim())
+
+    const missing = BRANCH_MAPPING_COLUMNS.filter((col) => !headerRow.includes(col))
+    if (missing.length > 0) {
+      alert(
+        `❌ File branch mapping thiếu các cột:\n${missing.join(', ')}\n\nCác cột cần có:\n${BRANCH_MAPPING_COLUMNS.join(', ')}`,
+      )
+      e.target.value = ''
+      return
+    }
+
+    const colIndex = {}
+    BRANCH_MAPPING_COLUMNS.forEach((col) => {
+      colIndex[col] = headerRow.indexOf(col)
+    })
+
+    const parsed = []
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i]
+      if (!row || row.every((cell) => cell == null || cell === '')) continue
+      const entry = {}
+      BRANCH_MAPPING_COLUMNS.forEach((col) => {
+        entry[col] = (row[colIndex[col]] ?? '').toString().trim()
+      })
+      if (entry.branchNameMomo) {
+        parsed.push(entry)
+      }
+    }
+
+    if (parsed.length === 0) {
+      alert('❌ Không tìm thấy dữ liệu hợp lệ trong file branch mapping.')
+      e.target.value = ''
+      return
+    }
+
+    branchMappingData.value = parsed
+    branchMappingLoaded.value = true
+    branchMappingFileName.value = file.name
+  } catch (err) {
+    alert('❌ Lỗi đọc file branch mapping: ' + err.message)
+    e.target.value = ''
   }
 }
 
-async function handleFileUpload(e) {
-  isLoading.value = true
+// --- Input File Upload Handler (stores files, does NOT export) ---
+function handleFileUpload(e) {
   let files = Array.from(e.target.files || [])
   if (files.length === 0) return
 
-  // validate tên file như cũ...
   const invalidFiles = files.filter((f) => !/^\d{2}\.\d{2}\.\d{4}\.(xlsx|xls)$/i.test(f.name))
   if (invalidFiles.length > 0) {
     alert(`❌ Tên file sai: \n${invalidFiles.map((f) => f.name).join('\n')}`)
     e.target.value = ''
     fileName.value = ''
+    uploadedFiles.value = []
     return
   }
 
+  uploadedFiles.value = files
   fileName.value = files.map((f) => f.name).join(', ')
+}
 
+// --- Export Handler (triggered by Export button) ---
+async function handleExport() {
+  if (!canExport.value) return
+
+  isLoading.value = true
+
+  try {
+    await processExport(uploadedFiles.value)
+  } catch (err) {
+    alert('❌ Lỗi xuất file: ' + err.message)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// --- Core export logic (unchanged from original) ---
+async function processExport(files) {
   const zip = new JSZip()
   const allStoresData = {}
 
-  // 👉 Sort files theo ngày
   function parseDateFromFileName(name) {
     const base = name.replace(/\.[^.]+$/, '')
     const parts = base.split('.')
@@ -396,11 +543,11 @@ async function handleFileUpload(e) {
     }
     return null
   }
-  files = files.sort((a, b) => parseDateFromFileName(a.name) - parseDateFromFileName(b.name))
+
+  files = [...files].sort((a, b) => parseDateFromFileName(a.name) - parseDateFromFileName(b.name))
 
   let lastSoChungTuGlobal = null
 
-  // Đọc từng file input (theo ngày đã sort)
   for (const [fileIdx, file] of files.entries()) {
     const data = await file.arrayBuffer()
     const workbook = XLSX.read(data, { type: 'array' })
@@ -422,9 +569,7 @@ async function handleFileUpload(e) {
       const storeName = row[1]
       if (!storeName) return
 
-      // 👉 Nếu chưa có store thì khởi tạo
       if (!allStoresData[storeName]) {
-        // nếu là file đầu tiên → lấy từ cột 3, còn lại → kế thừa global
         const initSoChungTu = fileIdx === 0 ? Number(row[3]) || 0 : lastSoChungTuGlobal || 0
         allStoresData[storeName] = { slices: [], lastSoChungTu: initSoChungTu }
       }
@@ -447,16 +592,13 @@ async function handleFileUpload(e) {
   Object.entries(allStoresData).forEach(([storeName, data]) => {
     const { slices, lastSoChungTu } = data
 
-    // 👉 Lọc theo selectedChannels
     const filteredSlices = slices.filter((slice) => {
       const lastValue = (slice[slice.length - 1] || '').toString().toLowerCase()
 
-      // Nếu chọn tất cả channel → chỉ lọc theo ngày nếu có set
       if (selectedChannels.value.length === channels.length) {
         return selectedChannels.value.some((ch) => isRowInChannelDateRange(slice, ch))
       }
 
-      // Chỉ lấy dòng có chứa ít nhất 1 kênh được chọn và nằm trong khoảng ngày tương ứng
       return selectedChannels.value.some(
         (ch) => lastValue.includes(ch.toLowerCase()) && isRowInChannelDateRange(slice, ch),
       )
@@ -476,7 +618,7 @@ async function handleFileUpload(e) {
     })
 
     data.finalSoChungTu = soChungTu
-    lastSoChungTuGlobal = soChungTu // 👉 cập nhật cho file kế tiếp
+    lastSoChungTuGlobal = soChungTu
 
     const ws = XLSX.utils.aoa_to_sheet(sheetData)
     applyStyles(ws, sheetData)
@@ -491,7 +633,7 @@ async function handleFileUpload(e) {
 
   // 👉 Thêm file tổng hợp (có cả cột Donvi)
   const finalHeaders = [...HEADERS]
-  finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi') // thêm Donvi trước cột cuối
+  finalHeaders.splice(finalHeaders.length - 1, 0, 'Donvi')
   const allCombinedData = [['SoChungTu', ...finalHeaders, 'TenQuan']]
 
   Object.entries(allStoresData).forEach(([storeName, data]) => {
@@ -524,7 +666,6 @@ async function handleFileUpload(e) {
   const wbTotal = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wbTotal, wsTotal, 'TongHop')
 
-  // Ghi vào file ZIP
   zip.file(`TongHop.xlsx`, XLSX.write(wbTotal, { type: 'array', bookType: 'xlsx' }))
 
   // 👉 Sinh thêm file input đã cập nhật (cột 3 = SoChungTu cuối)
@@ -552,7 +693,7 @@ async function handleFileUpload(e) {
   }
 
   // 👉 Đặt tên file zip theo logic ngày
-  function parseDateFromFileName(name) {
+  function parseDateFromFileNameInner(name) {
     const base = name.replace(/\.[^.]+$/, '')
     const parts = base.split('.')
     if (parts.length === 3) {
@@ -563,7 +704,7 @@ async function handleFileUpload(e) {
   }
 
   const dates = files
-    .map((f) => parseDateFromFileName(f.name))
+    .map((f) => parseDateFromFileNameInner(f.name))
     .filter((d) => d instanceof Date && !isNaN(d))
 
   let zipName = 'result.zip'
@@ -597,13 +738,11 @@ async function handleFileUpload(e) {
 
   const content = await zip.generateAsync({ type: 'blob' })
   saveAs(content, zipName)
-  isLoading.value = false
 }
 
-// --- New: Download conversion tool ---
+// --- Download conversion tool ---
 async function downloadConversionTool() {
   try {
-    // Create a zip containing both BAT + PS1 files
     const zip = new JSZip()
     const files = [
       { path: '/convert-to-xls/convert_to_xls.bat', name: 'convert_to_xls.bat' },
@@ -628,7 +767,7 @@ async function downloadConversionTool() {
 }
 
 function isRowInChannelDateRange(row, channel) {
-  const dateStr = excelDateToString(row[28]) // "dd/mm/yyyy"
+  const dateStr = excelDateToString(row[28])
   if (!dateStr) return false
 
   const [dd, mm, yyyy] = dateStr.split('/').map(Number)
@@ -636,10 +775,8 @@ function isRowInChannelDateRange(row, channel) {
 
   let selectedDates = channelDateRanges.value[channel]
 
-  // ✅ Normalize thành mảng đúng định dạng
   if (!Array.isArray(selectedDates)) {
     if (typeof selectedDates === 'string') {
-      // Nếu là "08/10/2025, 11/10/2025" thì tách thành ['08/10/2025', '11/10/2025']
       selectedDates = selectedDates
         .split(',')
         .map((s) => s.trim())
@@ -671,5 +808,25 @@ function isRowInChannelDateRange(row, channel) {
   console.log('---------------------------------------------')
 
   return result
+}
+
+// --- Template download ---
+async function downloadTemplate(filePath) {
+  try {
+    // Lấy tên file sau dấu "/" cuối cùng
+    const fileName = filePath.split('/').pop()
+
+    const response = await fetch(filePath)
+    if (!response.ok) {
+      throw new Error('Không tải được file mẫu')
+    }
+
+    const blob = await response.blob()
+
+    // Save đúng tên file gốc
+    saveAs(blob, fileName)
+  } catch (error) {
+    alert('❌ Lỗi tải file mẫu: ' + error.message)
+  }
 }
 </script>
