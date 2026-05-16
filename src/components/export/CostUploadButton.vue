@@ -91,12 +91,19 @@
         </div>
 
         <!-- Download sample (pushed to right) -->
-        <div class="ml-auto">
+        <div class="flex flex-row gap-4 ml-auto">
+
           <button
-            @click="downloadTemplate"
+            @click="downloadTemplate('/cost-input.xlsx')"
             class="h-11 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 whitespace-nowrap"
           >
-            Download sample file
+            Download sample input file
+          </button>
+          <button
+            @click="downloadTemplate('/branch-mapping.xlsx')"
+            class="h-11 shadow-theme-xs flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 whitespace-nowrap"
+          >
+            Download sample branch mapping file
           </button>
         </div>
       </div>
@@ -800,12 +807,20 @@ function isRowInChannelDateRange(row, channel) {
 }
 
 // --- Main template download ---
-async function downloadTemplate() {
+async function downloadTemplate(filePath) {
   try {
-    const response = await fetch('/cost-input.xlsx')
-    if (!response.ok) throw new Error('Không tải được file mẫu')
+    // Lấy tên file sau dấu "/" cuối cùng
+    const fileName = filePath.split('/').pop()
+
+    const response = await fetch(filePath)
+    if (!response.ok) {
+      throw new Error('Không tải được file mẫu')
+    }
+
     const blob = await response.blob()
-    saveAs(blob, 'cost-input.xlsx')
+
+    // Save đúng tên file gốc
+    saveAs(blob, fileName)
   } catch (error) {
     alert('❌ Lỗi tải file mẫu: ' + error.message)
   }
